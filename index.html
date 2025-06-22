@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KarmaKit - Help Builders Get Users & Feedback</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="enhanced-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <img src="karmakit-logo.png" class="logo" alt="KarmaKit">
+        <div class="brand-text">
+          <h1>KarmaKit</h1>
+          <p class="tagline">Help builders get users and validate ideas</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn active" onclick="navigate('index.html')">
+          <span class="nav-icon">🏠</span>
+          Home
+        </button>
+        <button class="nav-btn" onclick="navigate('submit.html')">
+          <span class="nav-icon">🚀</span>
+          Submit Idea
+        </button>
+        <button class="nav-btn" onclick="navigate('profile.html')">
+          <span class="nav-icon">👤</span>
+          Profile
+        </button>
+      </nav>
+    </div>
+    <div class="user-status">
+      <div class="karma-display">
+        <span class="karma-icon">⭐</span>
+        <span id="karma-count">0</span>
+        <span class="karma-label">Karma</span>
+      </div>
+      <p id="greeting" class="user-greeting"></p>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="hero-section">
+      <h2 class="hero-title">Discover Amazing Projects</h2>
+      <p class="hero-subtitle">Swipe through innovative ideas, give feedback, and earn karma points!</p>
+    </div>
+
+    <div class="card-container" id="card-container">
+      <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading projects...</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="pass-btn" class="control-btn pass-btn" disabled>
+        <span class="btn-icon">⏭️</span>
+        Maybe Later
+        <span class="karma-reward">+1</span>
+      </button>
+      <button id="like-btn" class="control-btn like-btn" disabled>
+        <span class="btn-icon">❤️</span>
+        Love This!
+        <span class="karma-reward">+2</span>
+      </button>
+    </div>
+
+    <div class="action-section">
+      <button class="submit-cta" onclick="navigate('submit.html')">
+        <span class="cta-icon">✨</span>
+        Submit Your Idea
+        <span class="cta-subtitle">Share your project and get feedback</span>
+      </button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-number" id="total-projects">0</span>
+        <span class="stat-label">Projects</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="total-feedback">0</span>
+        <span class="stat-label">Feedback Given</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="active-builders">0</span>
+        <span class="stat-label">Active Builders</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Enhanced Comment Modal -->
+  <div class="modal" id="comment-modal">
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal-content enhanced-modal">
+      <div class="modal-header">
+        <h2>💬 Leave Feedback</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <textarea 
+          id="comment-text" 
+          placeholder="Share your thoughts, suggestions, or questions about this project..."
+          maxlength="500"
+        ></textarea>
+        <div class="char-counter">
+          <span id="char-count">0</span>/500
+        </div>
+        <div class="feedback-options">
+          <label class="checkbox-label">
+            <input type="checkbox" id="connect-checkbox">
+            <span class="checkmark"></span>
+            I'd like to connect with this builder
+          </label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" id="comment-submit" disabled>
+          Submit Feedback
+          <span class="karma-bonus">+3 karma</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast" id="success-toast">
+    <div class="toast-content">
+      <span class="toast-icon">🎉</span>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
+  <!-- Connection Modal -->
+  <div class="modal" id="connection-modal">
+    <div class="modal-overlay" onclick="closeConnectionModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🤝 Connect with Builder</h2>
+        <button class="close-btn" onclick="closeConnectionModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Share your contact info to connect with this builder:</p>
+        <input type="email" id="connect-email" placeholder="your.email@example.com">
+        <textarea id="connect-message" placeholder="Optional: Add a personal message..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeConnectionModal()">Cancel</button>
+        <button class="btn-primary" id="connect-submit">Send Connection Request</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Enhanced navigation with active states
+function navigate(page) { 
+  // Add loading state
+  document.body.classList.add('page-loading');
+  setTimeout(() => {
+    window.location = page;
+  }, 300);
+}
+
+// Enhanced error handling and utilities
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.error('Storage error:', e);
+    showToast('Unable to save data. Storage might be full.', 'error');
+    return false;
+  }
+}
+
+function safeGetItem(key, fallback = null) {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch (e) {
+    console.error('Storage read error:', e);
+    return fallback;
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('success-toast');
+  const messageEl = toast.querySelector('.toast-message');
+  const iconEl = toast.querySelector('.toast-icon');
+  
+  messageEl.textContent = message;
+  iconEl.textContent = type === 'success' ? '🎉' : '⚠️';
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Enhanced data initialization
+function init() {
+  if (!safeGetItem('companies')) {
+    const defaultCompanies = [
+      {
+        id: 1,
+        name: "EcoTrack",
+        logo: "https://via.placeholder.com/100/4CAF50/FFFFFF?text=ET",
+        idea: "AI-powered carbon footprint tracker for personal sustainability goals",
+        link: "#",
+        likes: 12,
+        comments: ["Love the eco-focus!", "Great UI design", "Could use more features"],
+        connections: []
+      },
+      {
+        id: 2,
+        name: "StudyBuddy",
+        logo: "https://via.placeholder.com/100/2196F3/FFFFFF?text=SB",
+        idea: "Collaborative study platform with AI-generated quiz questions",
+        link: "#",
+        likes: 8,
+        comments: ["Perfect for students!", "Amazing concept"],
+        connections: []
+      },
+      {
+        id: 3,
+        name: "FoodieMatch",
+        logo: "https://via.placeholder.com/100/FF9800/FFFFFF?text=FM",
+        idea: "Tinder for restaurants - swipe to discover new dining experiences",
+        link: "#",
+        likes: 15,
+        comments: ["Brilliant idea!", "I would use this daily"],
+        connections: []
+      }
+    ];
+    safeSetItem('companies', JSON.stringify(defaultCompanies));
+  }
+  
+  if (!safeGetItem('karma')) safeSetItem('karma', '0');
+  if (!safeGetItem('profile')) {
+    safeSetItem('profile', JSON.stringify({
+      user: 'Builder_' + Math.floor(Math.random() * 1000),
+      company: '',
+      email: ''
+    }));
+  }
+  if (!safeGetItem('totalFeedbackGiven')) safeSetItem('totalFeedbackGiven', '0');
+}
+
+let companies, currentIndex = 0;
+
+function load() { 
+  companies = JSON.parse(safeGetItem('companies', '[]'));
+  updateStats();
+}
+
+function saveCompanies() { 
+  safeSetItem('companies', JSON.stringify(companies)); 
+  updateStats();
+}
+
+function addKarma(points) {
+  let k = parseInt(safeGetItem('karma', '0'), 10); 
+  k += points;
+  safeSetItem('karma', k.toString());
+  updateKarmaDisplay();
+  animateKarmaGain(points);
+}
+
+function updateKarmaDisplay() {
+  document.getElementById('karma-count').textContent = safeGetItem('karma', '0');
+}
+
+function animateKarmaGain(points) {
+  const karmaDisplay = document.querySelector('.karma-display');
+  karmaDisplay.classList.add('karma-gained');
+  setTimeout(() => {
+    karmaDisplay.classList.remove('karma-gained');
+  }, 600);
+}
+
+function updateStats() {
+  document.getElementById('total-projects').textContent = companies.length;
+  document.getElementById('total-feedback').textContent = safeGetItem('totalFeedbackGiven', '0');
+  document.getElementById('active-builders').textContent = Math.min(companies.length * 2, 50);
+}
+
+function renderGreeting() {
+  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
+  const karma = safeGetItem('karma', '0');
+  document.getElementById('greeting').textContent = `Welcome back, ${profile.user}!`;
+}
+
+function renderCard() {
+  if (companies.length === 0) {
+    showEmptyState();
+    return;
+  }
+
+  const c = companies[currentIndex];
+  const container = document.getElementById('card-container');
+  
+  // Hide loading spinner
+  const spinner = document.getElementById('loading-spinner');
+  if (spinner) spinner.style.display = 'none';
+  
+  container.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-header">
+      <img src="${c.logo}" alt="${escapeHtml(c.name)}" onerror="this.src='https://via.placeholder.com/100'">
+      <div class="card-title-section">
+        <h2>${escapeHtml(c.name)}</h2>
+        <div class="project-badge">Project #${c.id}</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="project-idea">${escapeHtml(c.idea)}</p>
+    </div>
+    <div class="card-stats">
+      <div class="stat">
+        <span class="stat-icon">❤️</span>
+        <span class="stat-number">${c.likes}</span>
+        <span class="stat-text">likes</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">💬</span>
+        <span class="stat-number">${c.comments.length}</span>
+        <span class="stat-text">feedback</span>
+      </div>
+      <div class="stat">
+        <span class="stat-icon">🤝</span>
+        <span class="stat-number">${c.connections ? c.connections.length : 0}</span>
+        <span class="stat-text">connections</span>
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="card-btn visit-btn" onclick="window.open('${c.link}', '_blank')">
+        <span class="btn-icon">🔗</span>
+        Visit Project
+      </button>
+      <button class="card-btn comment-btn" onclick="openModal()">
+        <span class="btn-icon">💬</span>
+        Give Feedback
+      </button>
+    </div>
+  `;
+  
+  container.appendChild(card);
+  
+  // Enable control buttons
+  document.getElementById('pass-btn').disabled = false;
+  document.getElementById('like-btn').disabled = false;
+  
+  // Animate card entrance
+  setTimeout(() => card.classList.add('show'), 50);
+}
+
+function showEmptyState() {
+  const container = document.getElementById('card-container');
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">📱</div>
+      <h3>No projects yet!</h3>
+      <p>Be the first to submit your idea and start the feedback loop.</p>
+      <button class="btn-primary" onclick="navigate('submit.html')">Submit First Project</button>
+    </div>
+  `;
+}
+
+function nextCard() {
+  const card = document.querySelector('.card');
+  if (card) {
+    card.classList.add('card-exit');
+    setTimeout(() => {
+      currentIndex = (currentIndex + 1) % companies.length;
+      renderCard();
+    }, 300);
+  }
+}
+
+function handlePass() { 
+  addKarma(1); 
+  showToast('+1 karma for reviewing!');
+  nextCard(); 
+}
+
+function handleLike() { 
+  companies[currentIndex].likes++; 
+  saveCompanies(); 
+  addKarma(2); 
+  showToast('+2 karma for loving this project!');
+  nextCard(); 
+}
+
+// Enhanced modal functions
+function openModal() {
+  document.getElementById('comment-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  document.getElementById('comment-text').focus();
+}
+
+function closeModal() {
+  document.getElementById('comment-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+  document.getElementById('comment-text').value = '';
+  document.getElementById('connect-checkbox').checked = false;
+  updateCommentButton();
+}
+
+function openConnectionModal() {
+  document.getElementById('connection-modal').classList.add('active');
+}
+
+function closeConnectionModal() {
+  document.getElementById('connection-modal').classList.remove('active');
+  document.getElementById('connect-email').value = '';
+  document.getElementById('connect-message').value = '';
+}
+
+function updateCommentButton() {
+  const text = document.getElementById('comment-text').value.trim();
+  const submitBtn = document.getElementById('comment-submit');
+  submitBtn.disabled = text.length === 0;
+}
+
+function updateCharCount() {
+  const text = document.getElementById('comment-text').value;
+  document.getElementById('char-count').textContent = text.length;
+  updateCommentButton();
+}
+
+function submitComment() {
+  const txt = document.getElementById('comment-text').value.trim();
+  const wantsConnection = document.getElementById('connect-checkbox').checked;
+  
+  if (txt) {
+    companies[currentIndex].comments.push(txt);
+    
+    if (wantsConnection) {
+      if (!companies[currentIndex].connections) {
+        companies[currentIndex].connections = [];
+      }
+      // In a real app, you'd collect user contact info
+      companies[currentIndex].connections.push({
+        message: txt,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    saveCompanies();
+    addKarma(3);
+    
+    // Update total feedback counter
+    let totalFeedback = parseInt(safeGetItem('totalFeedbackGiven', '0'), 10);
+    totalFeedback++;
+    safeSetItem('totalFeedbackGiven', totalFeedback.toString());
+    
+    closeModal();
+    
+    if (wantsConnection) {
+      showToast('Feedback sent & connection request made! +3 karma');
+      setTimeout(() => openConnectionModal(), 1000);
+    } else {
+      showToast('Feedback submitted! +3 karma');
+    }
+    
+    renderCard(); // Refresh to show updated stats
+  }
+}
+
+function submitConnection() {
+  const email = document.getElementById('connect-email').value.trim();
+  const message = document.getElementById('connect-message').value.trim();
+  
+  if (email) {
+    // In a real app, this would send an actual connection request
+    showToast('Connection request sent!');
+    closeConnectionModal();
+  } else {
+    alert('Please enter your email address');
+  }
+}
+
+// Event listeners
+window.onload = () => {
+  init(); 
+  load(); 
+  renderGreeting(); 
+  updateKarmaDisplay();
+  
+  // Simulate loading delay
+  setTimeout(() => {
+    renderCard();
+  }, 800);
+  
+  // Button event listeners
+  document.getElementById('pass-btn').onclick = handlePass;
+  document.getElementById('like-btn').onclick = handleLike;
+  document.getElementById('comment-submit').onclick = submitComment;
+  document.getElementById('connect-submit').onclick = submitConnection;
+  
+  // Comment text area listeners
+  const commentText = document.getElementById('comment-text');
+  commentText.addEventListener('input', updateCharCount);
+  commentText.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      submitComment();
+    }
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (!document.querySelector('.modal.active')) {
+      if (e.key === 'ArrowLeft' || e.key === 'a') handlePass();
+      if (e.key === 'ArrowRight' || e.key === 'd') handleLike();
+      if (e.key === ' ') {
+        e.preventDefault();
+        openModal();
+      }
+    }
+    if (e.key === 'Escape') {
+      closeModal();
+      closeConnectionModal();
+    }
+  });
+};
+</script>
+</body>
+</html>

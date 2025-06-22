@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile - KarmaKit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <header class="enhanced-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <img src="karmakit-logo.png" class="logo" alt="KarmaKit">
+        <div class="brand-text">
+          <h1>KarmaKit</h1>
+          <p class="tagline">Help builders get users and validate ideas</p>
+        </div>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-btn" onclick="navigate('index.html')">
+          <span class="nav-icon">🏠</span>
+          Home
+        </button>
+        <button class="nav-btn" onclick="navigate('submit.html')">
+          <span class="nav-icon">🚀</span>
+          Submit Idea
+        </button>
+        <button class="nav-btn active" onclick="navigate('profile.html')">
+          <span class="nav-icon">👤</span>
+          Profile
+        </button>
+      </nav>
+    </div>
+    <div class="user-status">
+      <div class="karma-display">
+        <span class="karma-icon">⭐</span>
+        <span id="karma-count">0</span>
+        <span class="karma-label">Karma</span>
+      </div>
+      <p id="greeting" class="user-greeting"></p>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="hero-section">
+      <h2 class="hero-title">👤 Your Profile</h2>
+      <p class="hero-subtitle">Manage your information and track your KarmaKit journey</p>
+    </div>
+
+    <!-- Profile Overview Card -->
+    <div class="profile-overview">
+      <div class="profile-avatar">
+        <div class="avatar-circle" id="avatar-circle">
+          <span id="avatar-initials">?</span>
+        </div>
+        <div class="profile-level">
+          <span class="level-badge" id="level-badge">Newbie</span>
+        </div>
+      </div>
+      <div class="profile-summary">
+        <h3 id="profile-name">Guest User</h3>
+        <p id="profile-company">No company set</p>
+        <div class="profile-stats">
+          <div class="stat-pill">
+            <span class="stat-icon">⭐</span>
+            <span id="total-karma">0</span>
+            <span>Total Karma</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-icon">📈</span>
+            <span id="profile-rank">Unranked</span>
+            <span>Level</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">🚀</span>
+          <h4>Projects Submitted</h4>
+        </div>
+        <div class="stat-value" id="projects-submitted">0</div>
+        <div class="stat-description">Ideas shared with community</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">❤️</span>
+          <h4>Likes Received</h4>
+        </div>
+        <div class="stat-value" id="likes-received">0</div>
+        <div class="stat-description">People who loved your projects</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">💬</span>
+          <h4>Feedback Received</h4>
+        </div>
+        <div class="stat-value" id="comments-received">0</div>
+        <div class="stat-description">Valuable insights from builders</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">🤝</span>
+          <h4>Connections Made</h4>
+        </div>
+        <div class="stat-value" id="connections-made">0</div>
+        <div class="stat-description">Network connections established</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">🎯</span>
+          <h4>Feedback Given</h4>
+        </div>
+        <div class="stat-value" id="feedback-given">0</div>
+        <div class="stat-description">Help provided to other builders</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-icon-large">🏆</span>
+          <h4>Achievement Level</h4>
+        </div>
+        <div class="stat-value" id="achievement-level">Bronze</div>
+        <div class="stat-description">Based on your karma points</div>
+      </div>
+    </div>
+
+    <!-- Profile Form -->
+    <form class="profile-form" id="profile-form">
+      <div class="form-header">
+        <h3>📝 Edit Profile Information</h3>
+        <p>Update your details to help other builders connect with you</p>
+      </div>
+
+      <label>
+        Your Name *
+        <input type="text" id="user-name" required maxlength="50" placeholder="Enter your full name">
+        <span class="char-counter"><span id="name-count">0</span>/50</span>
+      </label>
+
+      <label>
+        Company/Organization
+        <input type="text" id="company-name" maxlength="100" placeholder="Your startup, company, or school">
+        <span class="char-counter"><span id="company-count">0</span>/100</span>
+      </label>
+
+      <label>
+        Email Address
+        <input type="email" id="user-email" placeholder="your.email@example.com (for connections)">
+        <small class="field-hint">Used for connection requests - kept private unless you choose to share</small>
+      </label>
+
+      <label>
+        Bio/Tagline
+        <textarea id="user-bio" maxlength="150" placeholder="Brief description about yourself and what you're building..." rows="3"></textarea>
+        <span class="char-counter"><span id="bio-count">0</span>/150</span>
+      </label>
+
+      <div class="privacy-settings">
+        <h4>🔒 Privacy Settings</h4>
+        <label class="checkbox-label">
+          <input type="checkbox" id="allow-connections">
+          <span class="checkmark"></span>
+          Allow other builders to send me connection requests
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="show-email">
+          <span class="checkmark"></span>
+          Show my email publicly on my projects
+        </label>
+      </div>
+
+      <button type="submit" id="save-btn">
+        <span class="btn-icon">💾</span>
+        Save Profile
+      </button>
+    </form>
+
+    <!-- My Projects Section -->
+    <div class="my-projects-section">
+      <div class="section-header">
+        <h3>🚀 My Projects</h3>
+        <button class="btn-secondary" onclick="navigate('submit.html')">
+          <span class="btn-icon">➕</span>
+          Add New Project
+        </button>
+      </div>
+      <div id="my-projects-list" class="projects-list">
+        <!-- Projects will be populated here -->
+      </div>
+    </div>
+
+    <!-- Karma Breakdown -->
+    <div class="karma-breakdown">
+      <h3>⭐ Karma Breakdown</h3>
+      <div class="karma-sources">
+        <div class="karma-source">
+          <span class="source-icon">🚀</span>
+          <span class="source-label">Projects Submitted</span>
+          <span class="source-value" id="karma-projects">0</span>
+        </div>
+        <div class="karma-source">
+          <span class="source-icon">❤️</span>
+          <span class="source-label">Projects Liked</span>
+          <span class="source-value" id="karma-likes">0</span>
+        </div>
+        <div class="karma-source">
+          <span class="source-icon">💬</span>
+          <span class="source-label">Feedback Given</span>
+          <span class="source-value" id="karma-feedback">0</span>
+        </div>
+        <div class="karma-source">
+          <span class="source-icon">👁️</span>
+          <span class="source-label">Projects Reviewed</span>
+          <span class="source-value" id="karma-reviews">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="data-management">
+      <h3>🗂️ Data Management</h3>
+      <div class="data-actions">
+        <button class="btn-secondary" onclick="exportData()">
+          <span class="btn-icon">📤</span>
+          Export My Data
+        </button>
+        <button class="btn-warning" onclick="confirmClearData()">
+          <span class="btn-icon">🗑️</span>
+          Clear All Data
+        </button>
+      </div>
+      <p class="data-note">Export your profile and project data, or reset your account to start fresh.</p>
+    </div>
+  </main>
+
+  <!-- Success Toast -->
+  <div class="toast" id="success-toast">
+    <div class="toast-content">
+      <span class="toast-icon">🎉</span>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal-overlay" onclick="closeConfirmModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚠️ Confirm Action</h2>
+        <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message">Are you sure you want to proceed?</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn-warning" id="confirm-action">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Enhanced utility functions
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.error('Storage error:', e);
+    showToast('Unable to save data. Storage might be full.', 'error');
+    return false;
+  }
+}
+
+function safeGetItem(key, fallback = null) {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch (e) {
+    console.error('Storage read error:', e);
+    return fallback;
+  }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('success-toast');
+  const messageEl = toast.querySelector('.toast-message');
+  const iconEl = toast.querySelector('.toast-icon');
+  
+  messageEl.textContent = message;
+  iconEl.textContent = type === 'success' ? '🎉' : type === 'warning' ? '⚠️' : '🎉';
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+function navigate(page) { 
+  document.body.classList.add('page-loading');
+  setTimeout(() => {
+    window.location = page;
+  }, 300);
+}
+
+function updateKarmaDisplay() {
+  const karma = safeGetItem('karma', '0');
+  document.getElementById('karma-count').textContent = karma;
+}
+
+function renderGreeting() {
+  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
+  document.getElementById('greeting').textContent = `Welcome, ${profile.user}!`;
+}
+
+// Profile calculation functions
+function calculateLevel(karma) {
+  const karmaInt = parseInt(karma, 10);
+  if (karmaInt >= 100) return 'Karma Master';
+  if (karmaInt >= 50) return 'Super Builder';
+  if (karmaInt >= 25) return 'Active Builder';
+  if (karmaInt >= 10) return 'Rising Star';
+  if (karmaInt >= 5) return 'Beginner';
+  return 'Newbie';
+}
+
+function calculateRank(karma) {
+  const karmaInt = parseInt(karma, 10);
+  if (karmaInt >= 100) return '🏆 Elite';
+  if (karmaInt >= 50) return '🥇 Gold';
+  if (karmaInt >= 25) return '🥈 Silver';
+  if (karmaInt >= 10) return '🥉 Bronze';
+  return 'Unranked';
+}
+
+function getInitials(name) {
+  return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
+}
+
+// Character counting
+function updateCharCount(inputId, countId, maxLength) {
+  const input = document.getElementById(inputId);
+  const counter = document.getElementById(countId);
+  const length = input.value.length;
+  
+  counter.textContent = length;
+  counter.style.color = length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
+}
+
+// Main render function
+function renderProfile() {
+  try {
+    const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":"","email":"","bio":""}'));
+    const companies = JSON.parse(safeGetItem('companies', '[]'));
+    const karma = safeGetItem('karma', '0');
+    const totalFeedback = safeGetItem('totalFeedbackGiven', '0');
+    
+    // Update form fields
+    document.getElementById('user-name').value = profile.user || '';
+    document.getElementById('company-name').value = profile.company || '';
+    document.getElementById('user-email').value = profile.email || '';
+    document.getElementById('user-bio').value = profile.bio || '';
+    document.getElementById('allow-connections').checked = profile.allowConnections || false;
+    document.getElementById('show-email').checked = profile.showEmail || false;
+    
+    // Update character counters
+    updateCharCount('user-name', 'name-count', 50);
+    updateCharCount('company-name', 'company-count', 100);
+    updateCharCount('user-bio', 'bio-count', 150);
+    
+    // Update profile overview
+    document.getElementById('profile-name').textContent = profile.user || 'Guest User';
+    document.getElementById('profile-company').textContent = profile.company || 'No company set';
+    document.getElementById('avatar-initials').textContent = getInitials(profile.user || 'Guest User');
+    document.getElementById('level-badge').textContent = calculateLevel(karma);
+    document.getElementById('total-karma').textContent = karma;
+    document.getElementById('profile-rank').textContent = calculateRank(karma);
+    
+    // Calculate user's project stats
+    let userProjects = [];
+    let totalLikes = 0;
+    let totalComments = 0;
+    let totalConnections = 0;
+    
+    if (companies && profile.company) {
+      userProjects = companies.filter(c => c.name === profile.company || c.submittedBy === profile.user);
+      totalLikes = userProjects.reduce((sum, p) => sum + (p.likes || 0), 0);
+      totalComments = userProjects.reduce((sum, p) => sum + (p.comments ? p.comments.length : 0), 0);
+      totalConnections = userProjects.reduce((sum, p) => sum + (p.connections ? p.connections.length : 0), 0);
+    }
+    
+    // Update detailed stats
+    document.getElementById('projects-submitted').textContent = userProjects.length;
+    document.getElementById('likes-received').textContent = totalLikes;
+    document.getElementById('comments-received').textContent = totalComments;
+    document.getElementById('connections-made').textContent = totalConnections;
+    document.getElementById('feedback-given').textContent = totalFeedback;
+    document.getElementById('achievement-level').textContent = calculateLevel(karma);
+    
+    // Update karma breakdown
+    document.getElementById('karma-projects').textContent = userProjects.length * 5;
+    document.getElementById('karma-likes').textContent = parseInt(safeGetItem('karmaFromLikes', '0'), 10);
+    document.getElementById('karma-feedback').textContent = parseInt(totalFeedback, 10) * 3;
+    document.getElementById('karma-reviews').textContent = parseInt(safeGetItem('karmaFromReviews', '0'), 10);
+    
+    // Render user projects
+    renderMyProjects(userProjects);
+    
+  } catch (error) {
+    console.error('Profile rendering error:', error);
+    showToast('Error loading profile data', 'error');
+    
+    // Reset to defaults
+    document.getElementById('total-karma').textContent = '0';
+    document.getElementById('projects-submitted').textContent = '0';
+    document.getElementById('likes-received').textContent = '0';
+    document.getElementById('comments-received').textContent = '0';
+  }
+}
+
+function renderMyProjects(projects) {
+  const container = document.getElementById('my-projects-list');
+  
+  if (projects.length === 0) {
+    container.innerHTML = `
+      <div class="empty-projects">
+        <div class="empty-icon">📱</div>
+        <h4>No projects yet!</h4>
+        <p>Submit your first project to start building your profile.</p>
+        <button class="btn-primary" onclick="navigate('submit.html')">Submit Project</button>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = projects.map(project => `
+    <div class="project-card">
+      <div class="project-header">
+        <img src="${project.logo}" alt="${escapeHtml(project.name)}" onerror="this.src='https://via.placeholder.com/60'">
+        <div class="project-info">
+          <h4>${escapeHtml(project.name)}</h4>
+          <p>${escapeHtml(project.idea)}</p>
+        </div>
+      </div>
+      <div class="project-stats">
+        <span class="project-stat">❤️ ${project.likes || 0}</span>
+        <span class="project-stat">💬 ${project.comments ? project.comments.length : 0}</span>
+        <span class="project-stat">🤝 ${project.connections ? project.connections.length : 0}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Form submission
+function saveProfile(event) {
+  event.preventDefault();
+  
+  const saveBtn = document.getElementById('save-btn');
+  const originalText = saveBtn.innerHTML;
+  
+  // Show loading state
+  saveBtn.innerHTML = '<span class="spinner"></span>Saving...';
+  saveBtn.disabled = true;
+  
+  try {
+    const user = document.getElementById('user-name').value.trim();
+    const company = document.getElementById('company-name').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const bio = document.getElementById('user-bio').value.trim();
+    const allowConnections = document.getElementById('allow-connections').checked;
+    const showEmail = document.getElementById('show-email').checked;
+    
+    if (!user) {
+      throw new Error('Name is required');
+    }
+    
+    const profile = {
+      user: escapeHtml(user),
+      company: escapeHtml(company),
+      email: escapeHtml(email),
+      bio: escapeHtml(bio),
+      allowConnections,
+      showEmail,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    if (safeSetItem('profile', JSON.stringify(profile))) {
+      setTimeout(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+        showToast('Profile saved successfully!');
+        renderProfile();
+      }, 1000);
+    } else {
+      throw new Error('Failed to save profile');
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast(error.message, 'error');
+    saveBtn.innerHTML = originalText;
+    saveBtn.disabled = false;
+  }
+}
+
+// Data management functions
+function exportData() {
+  try {
+    const data = {
+      profile: JSON.parse(safeGetItem('profile', '{}')),
+      companies: JSON.parse(safeGetItem('companies', '[]')),
+      karma: safeGetItem('karma', '0'),
+      totalFeedbackGiven: safeGetItem('totalFeedbackGiven', '0'),
+      exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'karmakit-data-export.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('Data exported successfully!');
+  } catch (error) {
+    console.error('Export error:', error);
+    showToast('Failed to export data', 'error');
+  }
+}
+
+function confirmClearData() {
+  document.getElementById('confirm-message').textContent = 
+    'This will permanently delete all your profile data, projects, and karma points. This action cannot be undone.';
+  document.getElementById('confirm-modal').classList.add('active');
+  document.getElementById('confirm-action').onclick = clearAllData;
+}
+
+function clearAllData() {
+  try {
+    localStorage.clear();
+    showToast('All data cleared successfully!');
+    closeConfirmModal();
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (error) {
+    console.error('Clear data error:', error);
+    showToast('Failed to clear data', 'error');
+  }
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirm-modal').classList.remove('active');
+}
+
+// Event listeners
+window.onload = () => {
+  updateKarmaDisplay();
+  renderGreeting();
+  renderProfile();
+  
+  // Form submission
+  document.getElementById('profile-form').onsubmit = saveProfile;
+  
+  // Character counters
+  document.getElementById('user-name').addEventListener('input', () => {
+    updateCharCount('user-name', 'name-count', 50);
+  });
+  
+  document.getElementById('company-name').addEventListener('input', () => {
+    updateCharCount('company-name', 'company-count', 100);
+  });
+  
+  document.getElementById('user-bio').addEventListener('input', () => {
+    updateCharCount('user-bio', 'bio-count', 150);
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeConfirmModal();
+    }
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      document.getElementById('profile-form').dispatchEvent(new Event('submit'));
+    }
+  });
+};
+</script>
+</body>
+</html>
