@@ -361,13 +361,42 @@ function updateCharCount(inputId, countId, maxLength) {
   counter.style.color = length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
 }
 
-// Main render function
+// FIXED: Enhanced karma tracking initialization
+function initializeKarmaTracking() {
+  if (!safeGetItem('karmaBreakdown')) {
+    const breakdown = {
+      projectsSubmitted: 0,
+      projectsLiked: 0, 
+      feedbackGiven: 0,
+      projectsReviewed: 0
+    };
+    safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
+  }
+}
+
+// FIXED: Enhanced project tracking with user association
+function getUserProjects() {
+  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
+  const companies = JSON.parse(safeGetItem('companies', '[]'));
+  
+  // Find projects submitted by current user using multiple criteria
+  return companies.filter(project => 
+    project.submittedBy === profile.user || 
+    project.submitterEmail === profile.email ||
+    (project.name && profile.company && project.name === profile.company)
+  );
+}
+
+// FIXED: Main render function with proper karma breakdown
 function renderProfile() {
   try {
+    initializeKarmaTracking();
+    
     const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":"","email":"","bio":""}'));
     const companies = JSON.parse(safeGetItem('companies', '[]'));
-    const karma = safeGetItem('karma', '0');
-    const totalFeedback = safeGetItem('totalFeedbackGiven', '0');
+    const karma = parseInt(safeGetItem('karma', '0'), 10);
+    const totalFeedback = parseInt(safeGetItem('totalFeedbackGiven', '0'), 10);
+    const karmaBreakdown = JSON.parse(safeGetItem('karmaBreakdown', '{"projectsSubmitted":0,"projectsLiked":0,"feedbackGiven":0,"projectsReviewed":0}'));
     
     // Update form fields
     document.getElementById('user-name').value = profile.user || '';
@@ -390,18 +419,17 @@ function renderProfile() {
     document.getElementById('total-karma').textContent = karma;
     document.getElementById('profile-rank').textContent = calculateRank(karma);
     
-    // Calculate user's project stats
-    let userProjects = [];
+    // FIXED: Get user's projects using enhanced matching
+    const userProjects = getUserProjects();
     let totalLikes = 0;
     let totalComments = 0;
     let totalConnections = 0;
     
-    if (companies && profile.company) {
-      userProjects = companies.filter(c => c.name === profile.company || c.submittedBy === profile.user);
-      totalLikes = userProjects.reduce((sum, p) => sum + (p.likes || 0), 0);
-      totalComments = userProjects.reduce((sum, p) => sum + (p.comments ? p.comments.length : 0), 0);
-      totalConnections = userProjects.reduce((sum, p) => sum + (p.connections ? p.connections.length : 0), 0);
-    }
+    userProjects.forEach(project => {
+      totalLikes += project.likes || 0;
+      totalComments += project.comments ? project.comments.length : 0;
+      totalConnections += project.connections ? project.connections.length : 0;
+    });
     
     // Update detailed stats
     document.getElementById('projects-submitted').textContent = userProjects.length;
@@ -411,11 +439,11 @@ function renderProfile() {
     document.getElementById('feedback-given').textContent = totalFeedback;
     document.getElementById('achievement-level').textContent = calculateLevel(karma);
     
-    // Update karma breakdown
-    document.getElementById('karma-projects').textContent = userProjects.length * 5;
-    document.getElementById('karma-likes').textContent = parseInt(safeGetItem('karmaFromLikes', '0'), 10);
-    document.getElementById('karma-feedback').textContent = parseInt(totalFeedback, 10) * 3;
-    document.getElementById('karma-reviews').textContent = parseInt(safeGetItem('karmaFromReviews', '0'), 10);
+    // FIXED: Update karma breakdown with actual tracked values
+    document.getElementById('karma-projects').textContent = karmaBreakdown.projectsSubmitted;
+    document.getElementById('karma-likes').textContent = karmaBreakdown.projectsLiked;
+    document.getElementById('karma-feedback').textContent = karmaBreakdown.feedbackGiven;
+    document.getElementById('karma-reviews').textContent = karmaBreakdown.projectsReviewed;
     
     // Render user projects
     renderMyProjects(userProjects);
@@ -432,6 +460,7 @@ function renderProfile() {
   }
 }
 
+// FIXED: Enhanced renderMyProjects to show actual user projects with timestamps
 function renderMyProjects(projects) {
   const container = document.getElementById('my-projects-list');
   
@@ -454,6 +483,7 @@ function renderMyProjects(projects) {
         <div class="project-info">
           <h4>${escapeHtml(project.name)}</h4>
           <p>${escapeHtml(project.idea)}</p>
+          <small class="project-date">Submitted: ${project.timestamp ? new Date(project.timestamp).toLocaleDateString() : 'Recently'}</small>
         </div>
       </div>
       <div class="project-stats">
@@ -472,7 +502,6 @@ function saveProfile(event) {
   const saveBtn = document.getElementById('save-btn');
   const originalText = saveBtn.innerHTML;
   
-  // Show loading state
   saveBtn.innerHTML = '<span class="spinner"></span>Saving...';
   saveBtn.disabled = true;
   
@@ -523,6 +552,7 @@ function exportData() {
       profile: JSON.parse(safeGetItem('profile', '{}')),
       companies: JSON.parse(safeGetItem('companies', '[]')),
       karma: safeGetItem('karma', '0'),
+      karmaBreakdown: JSON.parse(safeGetItem('karmaBreakdown', '{}')),
       totalFeedbackGiven: safeGetItem('totalFeedbackGiven', '0'),
       exportDate: new Date().toISOString()
     };
@@ -573,10 +603,8 @@ window.onload = () => {
   renderGreeting();
   renderProfile();
   
-  // Form submission
   document.getElementById('profile-form').onsubmit = saveProfile;
   
-  // Character counters
   document.getElementById('user-name').addEventListener('input', () => {
     updateCharCount('user-name', 'name-count', 50);
   });
@@ -589,7 +617,6 @@ window.onload = () => {
     updateCharCount('user-bio', 'bio-count', 150);
   });
   
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeConfirmModal();
@@ -601,5 +628,30 @@ window.onload = () => {
   });
 };
 </script>
+
+<style>
+.project-date {
+  color: var(--text-gray);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
 </body>
 </html>

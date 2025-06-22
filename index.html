@@ -59,7 +59,7 @@
       <button id="pass-btn" class="control-btn pass-btn" disabled>
         <span class="btn-icon">⏭️</span>
         Maybe Later
-        <span class="karma-reward">+1</span>
+        <span class="karma-reward">+2</span>
       </button>
       <button id="like-btn" class="control-btn like-btn" disabled>
         <span class="btn-icon">❤️</span>
@@ -127,14 +127,6 @@
     </div>
   </div>
 
-  <!-- Success Toast -->
-  <div class="toast" id="success-toast">
-    <div class="toast-content">
-      <span class="toast-icon">🎉</span>
-      <span class="toast-message"></span>
-    </div>
-  </div>
-
   <!-- Connection Modal -->
   <div class="modal" id="connection-modal">
     <div class="modal-overlay" onclick="closeConnectionModal()"></div>
@@ -155,10 +147,68 @@
     </div>
   </div>
 
+  <!-- Welcome/Signup Modal -->
+  <div class="modal" id="welcome-modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>🚀 Welcome to KarmaKit!</h2>
+      </div>
+      <div class="modal-body">
+        <div class="welcome-content">
+          <div class="welcome-icon">✨</div>
+          <h3>Help builders get users and validate ideas</h3>
+          <p>Join our community of builders! Give feedback, earn karma points, and connect with other innovators.</p>
+          
+          <form id="welcome-form">
+            <label>
+              Your Name *
+              <input type="text" id="welcome-name" required maxlength="50" placeholder="Enter your name">
+            </label>
+            
+            <label>
+              Email (optional)
+              <input type="email" id="welcome-email" placeholder="your.email@example.com">
+            </label>
+            
+            <label>
+              Company/Organization (optional)
+              <input type="text" id="welcome-company" maxlength="100" placeholder="Your startup, company, or school">
+            </label>
+            
+            <div class="welcome-benefits">
+              <h4>🎁 What you'll get:</h4>
+              <ul>
+                <li>⭐ Earn karma points for every interaction</li>
+                <li>💬 Give and receive valuable feedback</li>
+                <li>🤝 Connect with other builders</li>
+                <li>📊 Track your impact and achievements</li>
+              </ul>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="skipWelcome()">Skip for now</button>
+        <button class="btn-primary" onclick="completeWelcome()">
+          <span class="btn-icon">🚀</span>
+          Start Building!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div class="toast" id="success-toast">
+    <div class="toast-content">
+      <span class="toast-icon">🎉</span>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
 <script>
 // Enhanced navigation with active states
 function navigate(page) { 
-  // Add loading state
   document.body.classList.add('page-loading');
   setTimeout(() => {
     window.location = page;
@@ -206,8 +256,44 @@ function showToast(message, type = 'success') {
   }, 3000);
 }
 
+// FIXED: Enhanced karma tracking functions
+function initializeKarmaTracking() {
+  if (!safeGetItem('karmaBreakdown')) {
+    const breakdown = {
+      projectsSubmitted: 0,
+      projectsLiked: 0, 
+      feedbackGiven: 0,
+      projectsReviewed: 0
+    };
+    safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
+  }
+}
+
+function updateKarmaBreakdown(action, points) {
+  const breakdown = JSON.parse(safeGetItem('karmaBreakdown', '{"projectsSubmitted":0,"projectsLiked":0,"feedbackGiven":0,"projectsReviewed":0}'));
+  
+  switch(action) {
+    case 'submit':
+      breakdown.projectsSubmitted += points;
+      break;
+    case 'like':
+      breakdown.projectsLiked += points;
+      break;
+    case 'feedback':
+      breakdown.feedbackGiven += points;
+      break;
+    case 'review':
+      breakdown.projectsReviewed += points;
+      break;
+  }
+  
+  safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
+}
+
 // Enhanced data initialization
 function init() {
+  initializeKarmaTracking();
+  
   if (!safeGetItem('companies')) {
     const defaultCompanies = [
       {
@@ -217,8 +303,14 @@ function init() {
         idea: "AI-powered carbon footprint tracker for personal sustainability goals",
         link: "#",
         likes: 12,
-        comments: ["Love the eco-focus!", "Great UI design", "Could use more features"],
-        connections: []
+        comments: [
+          {text: "Love the eco-focus!", author: "Builder_123", timestamp: new Date().toISOString()},
+          {text: "Great UI design", author: "Builder_456", timestamp: new Date().toISOString()},
+          {text: "Could use more features", author: "Builder_789", timestamp: new Date().toISOString()}
+        ],
+        connections: [],
+        submittedBy: "Demo_User",
+        timestamp: new Date().toISOString()
       },
       {
         id: 2,
@@ -227,8 +319,13 @@ function init() {
         idea: "Collaborative study platform with AI-generated quiz questions",
         link: "#",
         likes: 8,
-        comments: ["Perfect for students!", "Amazing concept"],
-        connections: []
+        comments: [
+          {text: "Perfect for students!", author: "Builder_321", timestamp: new Date().toISOString()},
+          {text: "Amazing concept", author: "Builder_654", timestamp: new Date().toISOString()}
+        ],
+        connections: [],
+        submittedBy: "Demo_User_2",
+        timestamp: new Date().toISOString()
       },
       {
         id: 3,
@@ -237,8 +334,13 @@ function init() {
         idea: "Tinder for restaurants - swipe to discover new dining experiences",
         link: "#",
         likes: 15,
-        comments: ["Brilliant idea!", "I would use this daily"],
-        connections: []
+        comments: [
+          {text: "Brilliant idea!", author: "Builder_111", timestamp: new Date().toISOString()},
+          {text: "I would use this daily", author: "Builder_222", timestamp: new Date().toISOString()}
+        ],
+        connections: [],
+        submittedBy: "Demo_User_3",
+        timestamp: new Date().toISOString()
       }
     ];
     safeSetItem('companies', JSON.stringify(defaultCompanies));
@@ -249,7 +351,10 @@ function init() {
     safeSetItem('profile', JSON.stringify({
       user: 'Builder_' + Math.floor(Math.random() * 1000),
       company: '',
-      email: ''
+      email: '',
+      bio: '',
+      allowConnections: true,
+      showEmail: false
     }));
   }
   if (!safeGetItem('totalFeedbackGiven')) safeSetItem('totalFeedbackGiven', '0');
@@ -295,7 +400,6 @@ function updateStats() {
 
 function renderGreeting() {
   const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
-  const karma = safeGetItem('karma', '0');
   document.getElementById('greeting').textContent = `Welcome back, ${profile.user}!`;
 }
 
@@ -308,7 +412,6 @@ function renderCard() {
   const c = companies[currentIndex];
   const container = document.getElementById('card-container');
   
-  // Hide loading spinner
   const spinner = document.getElementById('loading-spinner');
   if (spinner) spinner.style.display = 'none';
   
@@ -334,7 +437,7 @@ function renderCard() {
       </div>
       <div class="stat">
         <span class="stat-icon">💬</span>
-        <span class="stat-number">${c.comments.length}</span>
+        <span class="stat-number">${c.comments ? c.comments.length : 0}</span>
         <span class="stat-text">feedback</span>
       </div>
       <div class="stat">
@@ -356,12 +459,8 @@ function renderCard() {
   `;
   
   container.appendChild(card);
-  
-  // Enable control buttons
   document.getElementById('pass-btn').disabled = false;
   document.getElementById('like-btn').disabled = false;
-  
-  // Animate card entrance
   setTimeout(() => card.classList.add('show'), 50);
 }
 
@@ -388,17 +487,20 @@ function nextCard() {
   }
 }
 
+// FIXED: Both actions now give +2 karma for honest feedback
 function handlePass() { 
-  addKarma(1); 
-  showToast('+1 karma for reviewing!');
+  updateKarmaBreakdown('review', 2); // Changed from 1 to 2
+  addKarma(2); // Changed from 1 to 2
+  showToast('+2 karma for reviewing!'); // Updated message
   nextCard(); 
 }
 
 function handleLike() { 
   companies[currentIndex].likes++; 
   saveCompanies(); 
-  addKarma(2); 
-  showToast('+2 karma for loving this project!');
+  updateKarmaBreakdown('like', 2); // Stays 2
+  addKarma(2); // Stays 2
+  showToast('+2 karma for loving this project!'); // Updated message
   nextCard(); 
 }
 
@@ -439,28 +541,35 @@ function updateCharCount() {
   updateCommentButton();
 }
 
+// FIXED: Enhanced comment submission with proper tracking
 function submitComment() {
   const txt = document.getElementById('comment-text').value.trim();
   const wantsConnection = document.getElementById('connect-checkbox').checked;
   
   if (txt) {
-    companies[currentIndex].comments.push(txt);
+    const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest"}'));
+    
+    companies[currentIndex].comments.push({
+      text: txt,
+      author: profile.user,
+      timestamp: new Date().toISOString()
+    });
     
     if (wantsConnection) {
       if (!companies[currentIndex].connections) {
         companies[currentIndex].connections = [];
       }
-      // In a real app, you'd collect user contact info
       companies[currentIndex].connections.push({
         message: txt,
+        author: profile.user,
         timestamp: new Date().toISOString()
       });
     }
     
     saveCompanies();
+    updateKarmaBreakdown('feedback', 3);
     addKarma(3);
     
-    // Update total feedback counter
     let totalFeedback = parseInt(safeGetItem('totalFeedbackGiven', '0'), 10);
     totalFeedback++;
     safeSetItem('totalFeedbackGiven', totalFeedback.toString());
@@ -474,20 +583,73 @@ function submitComment() {
       showToast('Feedback submitted! +3 karma');
     }
     
-    renderCard(); // Refresh to show updated stats
+    renderCard();
   }
 }
 
 function submitConnection() {
   const email = document.getElementById('connect-email').value.trim();
-  const message = document.getElementById('connect-message').value.trim();
-  
   if (email) {
-    // In a real app, this would send an actual connection request
     showToast('Connection request sent!');
     closeConnectionModal();
   } else {
     alert('Please enter your email address');
+  }
+}
+
+// Welcome modal functions
+function showWelcomeModal() {
+  document.getElementById('welcome-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  document.getElementById('welcome-name').focus();
+}
+
+function hideWelcomeModal() {
+  document.getElementById('welcome-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function completeWelcome() {
+  const name = document.getElementById('welcome-name').value.trim();
+  const email = document.getElementById('welcome-email').value.trim();
+  const company = document.getElementById('welcome-company').value.trim();
+  
+  if (!name) {
+    showToast('Please enter your name', 'error');
+    return;
+  }
+  
+  const profile = {
+    user: escapeHtml(name),
+    email: escapeHtml(email),
+    company: escapeHtml(company),
+    bio: '',
+    allowConnections: true,
+    showEmail: false,
+    welcomeCompleted: true,
+    joinDate: new Date().toISOString()
+  };
+  
+  safeSetItem('profile', JSON.stringify(profile));
+  hideWelcomeModal();
+  renderGreeting();
+  showToast(`Welcome to KarmaKit, ${name}! 🎉`);
+}
+
+function skipWelcome() {
+  const profile = JSON.parse(safeGetItem('profile', '{}'));
+  profile.welcomeCompleted = true;
+  safeSetItem('profile', JSON.stringify(profile));
+  hideWelcomeModal();
+  showToast('Welcome to KarmaKit! You can update your profile anytime.');
+}
+
+function checkFirstVisit() {
+  const profile = JSON.parse(safeGetItem('profile', '{}'));
+  if (!profile.welcomeCompleted) {
+    setTimeout(() => {
+      showWelcomeModal();
+    }, 1000);
   }
 }
 
@@ -497,19 +659,17 @@ window.onload = () => {
   load(); 
   renderGreeting(); 
   updateKarmaDisplay();
+  checkFirstVisit();
   
-  // Simulate loading delay
   setTimeout(() => {
     renderCard();
   }, 800);
   
-  // Button event listeners
   document.getElementById('pass-btn').onclick = handlePass;
   document.getElementById('like-btn').onclick = handleLike;
   document.getElementById('comment-submit').onclick = submitComment;
   document.getElementById('connect-submit').onclick = submitConnection;
   
-  // Comment text area listeners
   const commentText = document.getElementById('comment-text');
   commentText.addEventListener('input', updateCharCount);
   commentText.addEventListener('keypress', (e) => {
@@ -518,7 +678,6 @@ window.onload = () => {
     }
   });
   
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (!document.querySelector('.modal.active')) {
       if (e.key === 'ArrowLeft' || e.key === 'a') handlePass();
@@ -531,9 +690,89 @@ window.onload = () => {
     if (e.key === 'Escape') {
       closeModal();
       closeConnectionModal();
+      hideWelcomeModal();
     }
   });
 };
 </script>
+
+<style>
+.welcome-content {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-content h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.welcome-content p {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+#welcome-form {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#welcome-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: var(--primary);
+  gap: 0.5rem;
+}
+
+#welcome-form input {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 2px solid rgba(48, 31, 79, 0.1);
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+#welcome-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(48, 31, 79, 0.1);
+}
+
+.welcome-benefits {
+  background: linear-gradient(135deg, rgba(247, 201, 75, 0.1), rgba(247, 201, 75, 0.05));
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(247, 201, 75, 0.3);
+  margin-top: 1rem;
+}
+
+.welcome-benefits h4 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.welcome-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.welcome-benefits li {
+  font-size: 0.8rem;
+  padding: 0.25rem 0;
+  color: var(--text-dark);
+}
+</style>
 </body>
 </html>

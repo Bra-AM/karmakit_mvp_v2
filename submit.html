@@ -223,6 +223,28 @@ function renderGreeting() {
   document.getElementById('greeting').textContent = `Welcome, ${profile.user}!`;
 }
 
+// FIXED: Enhanced karma tracking
+function updateKarmaBreakdown(action, points) {
+  const breakdown = JSON.parse(safeGetItem('karmaBreakdown', '{"projectsSubmitted":0,"projectsLiked":0,"feedbackGiven":0,"projectsReviewed":0}'));
+  
+  switch(action) {
+    case 'submit':
+      breakdown.projectsSubmitted += points;
+      break;
+    case 'like':
+      breakdown.projectsLiked += points;
+      break;
+    case 'feedback':
+      breakdown.feedbackGiven += points;
+      break;
+    case 'review':
+      breakdown.projectsReviewed += points;
+      break;
+  }
+  
+  safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
+}
+
 // Form validation functions
 function validateForm() {
   const name = document.getElementById('comp-name').value.trim();
@@ -233,7 +255,6 @@ function validateForm() {
   let isValid = true;
   let errors = [];
 
-  // Required field validation
   if (!name) {
     errors.push('Project name is required');
     isValid = false;
@@ -250,7 +271,6 @@ function validateForm() {
     isValid = false;
   }
 
-  // URL validation
   if (logo && !isValidUrl(logo)) {
     errors.push('Logo URL must be a valid URL');
     isValid = false;
@@ -261,9 +281,7 @@ function validateForm() {
     isValid = false;
   }
 
-  // Update submit button state
   document.getElementById('submit-btn').disabled = !isValid;
-
   return { isValid, errors };
 }
 
@@ -287,18 +305,16 @@ function updateCharCount(inputId, countId, maxLength) {
   validateForm();
 }
 
-// Form submission
+// FIXED: Enhanced form submission with user association
 function submitIdea(event) {
   event.preventDefault();
   
   const submitBtn = document.getElementById('submit-btn');
   const originalText = submitBtn.innerHTML;
   
-  // Show loading state
   submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
   submitBtn.disabled = true;
   
-  // Validate form
   const validation = validateForm();
   if (!validation.isValid) {
     showToast(validation.errors[0], 'error');
@@ -314,8 +330,10 @@ function submitIdea(event) {
   
   try {
     const companies = JSON.parse(safeGetItem('companies', '[]'));
+    const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":"","email":""}'));
     const id = getNextId(companies);
     
+    // FIXED: Associate project with current user
     const newProject = {
       id,
       name: escapeHtml(name),
@@ -325,12 +343,18 @@ function submitIdea(event) {
       likes: 0,
       comments: [],
       connections: [],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      // IMPORTANT: Track who submitted this project
+      submittedBy: profile.user,
+      submitterEmail: profile.email,
+      submitterCompany: profile.company
     };
     
     companies.push(newProject);
     
     if (safeSetItem('companies', JSON.stringify(companies))) {
+      // FIXED: Update karma breakdown tracking
+      updateKarmaBreakdown('submit', 5);
       addKarma(5);
       
       // Reset form
@@ -338,7 +362,6 @@ function submitIdea(event) {
       updateCharCount('comp-name', 'name-count', 50);
       updateCharCount('comp-idea', 'idea-count', 200);
       
-      // Show success modal
       setTimeout(() => {
         submitBtn.innerHTML = originalText;
         showSuccessModal();
@@ -380,10 +403,8 @@ window.onload = () => {
   renderGreeting();
   updateKarmaDisplay();
   
-  // Form submission
   document.getElementById('submit-form').onsubmit = submitIdea;
   
-  // Character counters
   document.getElementById('comp-name').addEventListener('input', () => {
     updateCharCount('comp-name', 'name-count', 50);
   });
@@ -392,11 +413,9 @@ window.onload = () => {
     updateCharCount('comp-idea', 'idea-count', 200);
   });
   
-  // Real-time validation
   document.getElementById('comp-logo').addEventListener('input', validateForm);
   document.getElementById('comp-link').addEventListener('input', validateForm);
   
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSuccessModal();
@@ -406,7 +425,6 @@ window.onload = () => {
     }
   });
   
-  // Initialize validation
   validateForm();
 };
 </script>

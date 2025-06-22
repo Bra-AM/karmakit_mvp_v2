@@ -1,0 +1,190 @@
+<!-- Welcome/Signup Modal - Add this to index.html -->
+<div class="modal" id="welcome-modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🚀 Welcome to KarmaKit!</h2>
+    </div>
+    <div class="modal-body">
+      <div class="welcome-content">
+        <div class="welcome-icon">✨</div>
+        <h3>Help builders get users and validate ideas</h3>
+        <p>Join our community of builders! Give feedback, earn karma points, and connect with other innovators.</p>
+        
+        <form id="welcome-form">
+          <label>
+            Your Name *
+            <input type="text" id="welcome-name" required maxlength="50" placeholder="Enter your name">
+          </label>
+          
+          <label>
+            Email (optional)
+            <input type="email" id="welcome-email" placeholder="your.email@example.com">
+          </label>
+          
+          <label>
+            Company/Organization (optional)
+            <input type="text" id="welcome-company" maxlength="100" placeholder="Your startup, company, or school">
+          </label>
+          
+          <div class="welcome-benefits">
+            <h4>🎁 What you'll get:</h4>
+            <ul>
+              <li>⭐ Earn karma points for every interaction</li>
+              <li>💬 Give and receive valuable feedback</li>
+              <li>🤝 Connect with other builders</li>
+              <li>📊 Track your impact and achievements</li>
+            </ul>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="skipWelcome()">Skip for now</button>
+      <button class="btn-primary" onclick="completeWelcome()">
+        <span class="btn-icon">🚀</span>
+        Start Building!
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Welcome modal functions
+function showWelcomeModal() {
+  document.getElementById('welcome-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  document.getElementById('welcome-name').focus();
+}
+
+function hideWelcomeModal() {
+  document.getElementById('welcome-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function completeWelcome() {
+  const name = document.getElementById('welcome-name').value.trim();
+  const email = document.getElementById('welcome-email').value.trim();
+  const company = document.getElementById('welcome-company').value.trim();
+  
+  if (!name) {
+    showToast('Please enter your name', 'error');
+    return;
+  }
+  
+  const profile = {
+    user: escapeHtml(name),
+    email: escapeHtml(email),
+    company: escapeHtml(company),
+    bio: '',
+    allowConnections: true,
+    showEmail: false,
+    welcomeCompleted: true,
+    joinDate: new Date().toISOString()
+  };
+  
+  safeSetItem('profile', JSON.stringify(profile));
+  hideWelcomeModal();
+  renderGreeting();
+  showToast(`Welcome to KarmaKit, ${name}! 🎉`);
+}
+
+function skipWelcome() {
+  const profile = JSON.parse(safeGetItem('profile', '{}'));
+  profile.welcomeCompleted = true;
+  safeSetItem('profile', JSON.stringify(profile));
+  hideWelcomeModal();
+  showToast('Welcome to KarmaKit! You can update your profile anytime.');
+}
+
+function checkFirstVisit() {
+  const profile = JSON.parse(safeGetItem('profile', '{}'));
+  if (!profile.welcomeCompleted) {
+    setTimeout(() => {
+      showWelcomeModal();
+    }, 1000); // Show welcome modal after 1 second
+  }
+}
+
+// Add this to window.onload in index.html
+// checkFirstVisit();
+</script>
+
+<style>
+.welcome-content {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.welcome-content h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.welcome-content p {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+#welcome-form {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#welcome-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: var(--primary);
+  gap: 0.5rem;
+}
+
+#welcome-form input {
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 2px solid rgba(48, 31, 79, 0.1);
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+#welcome-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(48, 31, 79, 0.1);
+}
+
+.welcome-benefits {
+  background: linear-gradient(135deg, rgba(247, 201, 75, 0.1), rgba(247, 201, 75, 0.05));
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(247, 201, 75, 0.3);
+  margin-top: 1rem;
+}
+
+.welcome-benefits h4 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.welcome-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.welcome-benefits li {
+  font-size: 0.8rem;
+  padding: 0.25rem 0;
+  color: var(--text-dark);
+}
+</style>

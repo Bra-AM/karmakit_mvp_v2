@@ -4,7 +4,7 @@
 
 KarmaKit is a pop-up feedback exchange platform built for hackathons, demo days, and startup communities. Builders get feedback. Reviewers earn Karma Points.
 
-https://bra-am.github.io/karmakit_mvp_v2/
+![KarmaKit Demo](https://via.placeholder.com/800x400/301F4F/FFFFFF?text=KarmaKit+Demo)
 
 ## 🎯 Problem Statement
 
@@ -23,7 +23,7 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 
 ### Core Functionality
 - ✅ **Swipe Interface** - Browse through project cards with smooth animations
-- ✅ **Karma Point System** - Earn points for every interaction
+- ✅ **Balanced Karma System** - Equal rewards for honest feedback
 - ✅ **Real-time Feedback** - Leave comments and connect with builders
 - ✅ **Project Submission** - Easy form to showcase your innovation
 - ✅ **User Profiles** - Track your karma, projects, and achievements
@@ -75,7 +75,7 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/karmakit_mvp_v2.git
+git clone https://github.com/yourusername/karmakit.git
 cd karmakit
 
 # Open in your browser
@@ -99,9 +99,9 @@ python -m http.server 8000
 2. **Give Feedback** - Click "Give Feedback" to leave comments
 3. **Connect** - Check "I'd like to connect" to network with builders
 4. **Earn Karma** - Get points for every interaction:
-   - 👀 **+1 karma** for reviewing projects
-   - ❤️ **+2 karma** for liking projects  
-   - 💬 **+3 karma** for giving feedback
+   - 👀 **+2 karma** for reviewing projects (honest feedback encouraged)
+   - ❤️ **+2 karma** for liking projects (same as reviewing to prevent bias)
+   - 💬 **+3 karma** for giving detailed feedback
    - 🚀 **+5 karma** for submitting projects
 
 ### For Builders
@@ -116,6 +116,26 @@ python -m http.server 8000
 - **Live Stats** - View real-time engagement metrics
 - **Leaderboards** - Track top feedback givers and active builders
 - **Data Export** - Download participation data for analysis
+
+## 🏆 **KarmaKit Level System**
+
+| Level | Karma Points | Badge | Description |
+|-------|-------------|-------|-------------|
+| **🥱 Newbie** | 0-4 points | Bronze | Just getting started |
+| **🌱 Beginner** | 5-9 points | Bronze | Learning the ropes |
+| **⭐ Rising Star** | 10-24 points | 🥉 Bronze | Making an impact |
+| **🚀 Active Builder** | 25-49 points | 🥈 Silver | Consistently engaged |
+| **💪 Super Builder** | 50-99 points | 🥇 Gold | Community champion |
+| **👑 Karma Master** | 100+ points | 🏆 Elite | Ultimate contributor |
+
+## 🎯 **How to Earn Karma Points:**
+
+- **👀 Browse Projects** → +2 karma (click "Maybe Later")
+- **❤️ Like Projects** → +2 karma (click "Love This!")
+- **💬 Give Feedback** → +3 karma (leave comments)
+- **🚀 Submit Projects** → +5 karma (share your work)
+
+*Both browsing actions give equal karma to encourage honest feedback rather than gaming the system.*
 
 ## 🏗 File Structure
 
@@ -152,7 +172,7 @@ karmakit/
 
 **Team Alpha** posts their MVP link → **8 people** test and rate it within 15 minutes
 
-**Active user** gives 10 feedbacks → earns enough karma to **get a hoodie**
+**Active user** gives 5 feedbacks → earns enough karma to **get a hoodie**
 
 **Organizers** display a **live leaderboard** of "Top Feedback Givers" during awards
 
@@ -182,6 +202,7 @@ karmakit/
 - ✅ Core feedback and karma system
 - ✅ Mobile-responsive design
 - ✅ Local data storage
+- ✅ Balanced karma rewards
 
 ### Phase 2 (Next)
 - 🔄 Real backend with database
@@ -236,7 +257,7 @@ Created at **SpurHacks 2025** with love for the builder community.
 3. **Deploy to GitHub Pages** following the instructions above
 4. **Share with your community** and watch the feedback flow!
 
-**Demo URL**: `https://yourusername.github.io/karmakit_mvp_v2`
+**Demo URL**: `https://yourusername.github.io/karmakit`
 
 ---
 
@@ -247,3 +268,15 @@ Created at **SpurHacks 2025** with love for the builder community.
 - Join our community Discord [link]
 
 **Let's build the future of feedback together!** 🚀✨
+
+## 🎯 **Why Balanced Karma?**
+
+We implemented **equal karma rewards** (+2 for both "Maybe Later" and "Love This") to:
+
+- ✅ **Encourage honest feedback** - No bias toward positive reactions
+- ✅ **Prevent gaming** - Users can't farm points by spamming likes  
+- ✅ **Maintain engagement** - Still rewards every interaction
+- ✅ **Focus on quality** - Detailed feedback (+3) remains the highest reward
+
+This creates a healthier feedback ecosystem where builders get genuine reactions rather than inflated likes!
+   
