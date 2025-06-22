@@ -76,7 +76,7 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/karmakit_mvp_v2.git
-cd karmakit
+cd karmakit_mvp_v2
 
 # Open in your browser
 open index.html
