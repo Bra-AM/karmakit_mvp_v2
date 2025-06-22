@@ -4,7 +4,7 @@
 
 KarmaKit is a pop-up feedback exchange platform built for hackathons, demo days, and startup communities. Builders get feedback. Reviewers earn Karma Points.
 
-![KarmaKit Demo](https://via.placeholder.com/800x400/301F4F/FFFFFF?text=KarmaKit+Demo)
+https://bra-am.github.io/karmakit_mvp_v2/
 
 ## 🎯 Problem Statement
 
@@ -75,7 +75,7 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/karmakit.git
+git clone https://github.com/yourusername/karmakit_mvp_v2.git
 cd karmakit
 
 # Open in your browser
@@ -152,7 +152,7 @@ karmakit/
 
 **Team Alpha** posts their MVP link → **8 people** test and rate it within 15 minutes
 
-**Active user** gives 5 feedbacks → earns enough karma to **get a hoodie**
+**Active user** gives 10 feedbacks → earns enough karma to **get a hoodie**
 
 **Organizers** display a **live leaderboard** of "Top Feedback Givers" during awards
 
@@ -236,7 +236,7 @@ Created at **SpurHacks 2025** with love for the builder community.
 3. **Deploy to GitHub Pages** following the instructions above
 4. **Share with your community** and watch the feedback flow!
 
-**Demo URL**: `https://yourusername.github.io/karmakit`
+**Demo URL**: `https://yourusername.github.io/karmakit_mvp_v2`
 
 ---
 
