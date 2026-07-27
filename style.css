@@ -24,13 +24,22 @@
   padding: 0;
 }
 
+/* Horizontal clipping belongs on the root, not on body. `overflow-x: hidden`
+   on body turns body into a scroll container and forces overflow-y to `auto`,
+   which is a well-known way to end up with a page that will not scroll. */
+html {
+  overflow-x: hidden;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, var(--bg-start), var(--bg-end));
   color: var(--text-dark);
   min-height: 100vh;
   line-height: 1.6;
-  overflow-x: hidden;
+  /* `clip` prevents sideways scroll without creating a scroll container.
+     Falls back to `visible` on old browsers, where the html rule catches it. */
+  overflow-x: clip;
 }
 
 /* Enhanced Header */

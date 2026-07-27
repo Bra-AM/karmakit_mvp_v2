@@ -19,17 +19,19 @@
     "cleanUrls": true,
     "headers": [
       {
-        "source": "**/*.@(js|css|png|jpg|svg)",
-        "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }]
-      },
-      {
-        "source": "**/*.html",
+        "comment": "Matches ** rather than **/*.html because cleanUrls serves pages as /login and /profile, with no .html in the request path. An *.html glob never fires for those, which silently disabled every header below. Default is no-cache: there is no build step and no content hashing in filenames, so any real max-age means a deploy does not reach users until their cache expires.",
+        "source": "**",
         "headers": [
           { "key": "Cache-Control", "value": "no-cache" },
           { "key": "X-Content-Type-Options", "value": "nosniff" },
           { "key": "X-Frame-Options", "value": "DENY" },
           { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
         ]
+      },
+      {
+        "comment": "Images are content-stable, so they may be cached properly.",
+        "source": "**/*.@(png|jpg|jpeg|svg|ico|webp|woff2)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
       }
     ]
   }
