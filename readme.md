@@ -4,9 +4,9 @@
 
 KarmaKit is a pop-up feedback exchange platform built for hackathons, demo days, and startup communities. Builders get feedback. Reviewers earn Karma Points.
 
-**Live at https://karmakitapp.com**
+### 👉 Live at **[karmakitapp.com](https://karmakitapp.com)**
 
-Deploying it yourself? See **[SETUP.md](SETUP.md)**.
+Sign up with email or Google, submit a project, and start trading feedback.
 
 ## 🎯 Problem Statement
 
@@ -48,37 +48,36 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 - **Database**: Cloud Firestore, with access controlled by `firestore.rules`
 - **Hosting**: Firebase Hosting
 
-## 🚀 Quick Start
+## 🧑‍💻 Working on KarmaKit
 
-### Deploying your own instance
+This is the repository for the live product, not a template. The code is public
+because nothing here is secret — the app is static, so every browser downloads
+it anyway, and access control is enforced server-side by `firestore.rules`.
 
-Full walkthrough in **[SETUP.md](SETUP.md)**. The short version:
-
-```bash
-npm install -g firebase-tools
-firebase login
-
-# 1. Create a Firebase project, enable Email/Password + Google auth,
-#    and create a Firestore database in production mode.
-# 2. Paste your web config into js/firebase-config.js
-# 3. Then:
-firebase deploy
-```
-
-### Local development
+### Running it locally
 
 The app uses ES modules, so it must be served over HTTP — opening `index.html`
-directly from the filesystem will fail on CORS.
+straight from the filesystem fails on CORS.
 
 ```bash
-git clone https://github.com/Bra-AM/karmakit_mvp_v2.git
-cd karmakit_mvp_v2
 python -m http.server 8000
 # then visit http://localhost:8000/login.html
 ```
 
-Add `localhost` under **Firebase Console → Authentication → Settings →
-Authorized domains** so sign-in works locally.
+`localhost` is already an authorized domain in Firebase Auth, so sign-in works
+against the live project. Be aware that means **local development writes to the
+production database** — use a throwaway account, or add a separate Firebase
+project for staging once the user base makes that worth doing.
+
+### Shipping a change
+
+```bash
+firebase deploy --only hosting                      # site only
+firebase deploy --only firestore:rules              # after editing rules
+```
+
+Operational reference — Firebase setup, DNS, OAuth, and the known tradeoffs
+worth revisiting — lives in **[SETUP.md](SETUP.md)**.
 
 ## 📱 Usage
 
@@ -248,44 +247,37 @@ enforced, no moderation tooling yet) are documented honestly in
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how to get started:
+Bug reports and ideas are welcome — open an issue. If you've spotted a hole in
+`firestore.rules`, please report it privately to hello@karmakitapp.com rather
+than in a public issue.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Pull requests are considered case by case. Because this repo deploys to a live
+product, please open an issue to discuss before building anything substantial.
 
-### Development Guidelines
+### Guidelines
 - Follow existing code style and structure
-- Test on mobile and desktop devices
-- Ensure accessibility compliance
-- Add appropriate comments for complex logic
+- Test on mobile and desktop
+- Keep accessibility intact
+- Comment anything non-obvious
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright © 2026 Brady Ali Medina. All rights reserved.
+
+The source is publicly visible for transparency — users can verify how their
+data is handled — but it is not licensed for reuse.
 
 ## 🏆 Built With 💛
 
-Created at **SpurHacks 2025** with love for the builder community.
-
----
-
-## 🚀 Ready to Launch?
-
-Follow **[SETUP.md](SETUP.md)** — Firebase project, security rules, custom domain,
-Google consent screen, and a test checklist that catches the things that actually
-break on launch day.
-
-**Live URL**: https://karmakitapp.com
+Started at **SpurHacks 2025** with love for the builder community, and now live
+for real users at **[karmakitapp.com](https://karmakitapp.com)**.
 
 ---
 
 ### 💬 Questions or Issues?
 
 - Open an issue on GitHub
-- Contact us at hello@karmakitapp.com
+- Email hello@karmakitapp.com
 
 **Let's build the future of feedback together!** 🚀✨
 
