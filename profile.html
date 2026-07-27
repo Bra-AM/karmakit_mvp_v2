@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Profile - KarmaKit</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3"/>
+  <link rel="stylesheet" href="style.css?v=4"/>
 </head>
 <body>
   <header class="enhanced-header">
@@ -228,6 +228,70 @@
     </div>
   </div>
 
+  <!-- Edit a project you own -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-overlay" data-close="edit"></div>
+    <div class="modal-content enhanced-modal">
+      <div class="modal-header">
+        <h2>✏️ Edit project</h2>
+        <button class="close-btn" data-close="edit">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="auth-error" id="edit-error" role="alert" hidden></p>
+        <form id="edit-form" class="auth-form">
+          <label>
+            Project name *
+            <input type="text" id="edit-name" required maxlength="50">
+          </label>
+          <label>
+            Description *
+            <textarea id="edit-idea" required minlength="20" maxlength="350" rows="5"></textarea>
+            <span class="char-counter"><span id="edit-idea-count">0</span>/350 &middot; minimum 20</span>
+          </label>
+          <label>
+            Try it link
+            <input type="url" id="edit-link" placeholder="https://demo.your-project.com">
+          </label>
+          <label>
+            Project website
+            <input type="url" id="edit-website" placeholder="https://your-project.com">
+          </label>
+          <label>
+            Logo URL
+            <input type="url" id="edit-logo" placeholder="https://example.com/logo.png">
+          </label>
+        </form>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="edit">Cancel</button>
+        <button class="btn-primary" id="edit-save">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm deleting a project you own -->
+  <div class="modal" id="delete-project-modal">
+    <div class="modal-overlay" data-close="delete-project"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚠️ Delete this project?</h2>
+        <button class="close-btn" data-close="delete-project">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="delete-project-name"></p>
+        <p>
+          It will be removed from the feed permanently. Feedback other builders
+          already gave you stays on their record — their karma was earned.
+        </p>
+        <p class="auth-error" id="delete-project-error" hidden></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" data-close="delete-project">Cancel</button>
+        <button class="btn-warning" id="confirm-delete-project">Delete project</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="confirm-modal">
     <div class="modal-overlay" data-close="confirm"></div>
     <div class="modal-content">
@@ -253,12 +317,15 @@
 import { requireAuth, logout, getProfile, saveProfile, renderVerifyBanner } from './js/auth.js';
 import * as api from './js/api.js';
 import { db, auth } from './js/firebase-config.js';
-import { esc, initials, colorFor, avatarMarkup, formatDate, navigate, showToast, setBusy, levelFor, rankFor } from './js/ui.js';
+import { esc, initials, colorFor, avatarMarkup, formatDate, navigate, showToast, setBusy, safeUrl, levelFor, rankFor } from './js/ui.js';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 let user = null;
 let profile = null;
+let myProjects = [];
+let editingId = null;
+let deletingId = null;
 
 function updateCharCount(inputId, countId, maxLength) {
   const input = document.getElementById(inputId);
@@ -281,6 +348,8 @@ async function renderProjects() {
       </div>`;
     return 0;
   }
+
+  myProjects = projects; // kept so the edit dialog can prefill without a refetch
 
   const [withCounts, feedbackByProject] = await Promise.all([
     Promise.all(
@@ -306,6 +375,10 @@ async function renderProjects() {
         <span class="project-stat">❤️ ${project.counts.likes}</span>
         <span class="project-stat">💬 ${project.counts.comments}</span>
         <span class="project-stat">🤝 ${project.counts.connections}</span>
+      </div>
+      <div class="project-actions">
+        <button class="btn-tiny" data-edit="${esc(project.id)}">✏️ Edit</button>
+        <button class="btn-tiny danger" data-delete="${esc(project.id)}">🗑️ Delete</button>
       </div>
       ${
         feedback.length
@@ -403,6 +476,114 @@ async function render() {
   document.getElementById('karma-reviews').textContent = karma.breakdown.projectsReviewed;
 
   await Promise.all([renderProjects(), renderConnections()]);
+}
+
+/* ------------------------------------------------- editing your projects -- */
+
+function openEdit(projectId) {
+  const project = myProjects.find((p) => p.id === projectId);
+  if (!project) return;
+
+  editingId = projectId;
+  document.getElementById('edit-error').hidden = true;
+  document.getElementById('edit-name').value = project.name || '';
+  document.getElementById('edit-idea').value = project.idea || '';
+  document.getElementById('edit-link').value = project.link || '';
+  document.getElementById('edit-website').value = project.website || '';
+  document.getElementById('edit-logo').value = project.logo || '';
+  document.getElementById('edit-idea-count').textContent = (project.idea || '').length;
+
+  document.getElementById('edit-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+  editingId = null;
+}
+
+async function saveEdit() {
+  if (!editingId) return;
+
+  const name = document.getElementById('edit-name').value.trim();
+  const idea = document.getElementById('edit-idea').value.trim();
+  const link = document.getElementById('edit-link').value.trim();
+  const website = document.getElementById('edit-website').value.trim();
+  const logo = document.getElementById('edit-logo').value.trim();
+  const errorEl = document.getElementById('edit-error');
+
+  // Mirrors the submit form and firestore.rules, so a bad edit fails here with
+  // a readable message rather than as a permission error from the database.
+  const problem =
+    !name ? 'Project name is required.'
+    : idea.length < 20 ? 'Please describe your project in at least 20 characters.'
+    : link && !safeUrl(link) ? 'Try it link must be a valid http:// or https:// address.'
+    : website && !safeUrl(website) ? 'Website must be a valid http:// or https:// address.'
+    : logo && !safeUrl(logo) ? 'Logo URL must be a valid http:// or https:// address.'
+    : null;
+
+  if (problem) {
+    errorEl.textContent = problem;
+    errorEl.hidden = false;
+    return;
+  }
+
+  const button = document.getElementById('edit-save');
+  setBusy(button, true, 'Saving...');
+  try {
+    await api.updateProject(editingId, {
+      name,
+      idea,
+      link: safeUrl(link) || '',
+      website: safeUrl(website) || '',
+      logo: safeUrl(logo) || ''
+    });
+    closeEdit();
+    showToast('Project updated!');
+    await renderProjects();
+  } catch (error) {
+    console.error(error);
+    errorEl.textContent = 'Could not save your changes. Please try again.';
+    errorEl.hidden = false;
+  } finally {
+    setBusy(button, false);
+  }
+}
+
+function openDeleteProject(projectId) {
+  const project = myProjects.find((p) => p.id === projectId);
+  if (!project) return;
+  deletingId = projectId;
+  document.getElementById('delete-project-error').hidden = true;
+  document.getElementById('delete-project-name').textContent = `"${project.name}"`;
+  document.getElementById('delete-project-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeDeleteProject() {
+  document.getElementById('delete-project-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+  deletingId = null;
+}
+
+async function confirmDeleteProject() {
+  if (!deletingId) return;
+  const button = document.getElementById('confirm-delete-project');
+  setBusy(button, true, 'Deleting...');
+  try {
+    await api.deleteProject(deletingId);
+    closeDeleteProject();
+    showToast('Project deleted.');
+    await render();
+  } catch (error) {
+    console.error(error);
+    const errorEl = document.getElementById('delete-project-error');
+    errorEl.textContent = 'Could not delete the project. Please try again.';
+    errorEl.hidden = false;
+  } finally {
+    setBusy(button, false);
+  }
 }
 
 async function handleSave(event) {
@@ -515,9 +696,25 @@ function closeConfirm() {
 
   renderVerifyBanner(user);
 
+  // Delegated: project cards are re-rendered, so per-element handlers would
+  // be lost every time the list refreshes.
   document.addEventListener('click', (event) => {
-    const target = event.target.closest('[data-nav]');
-    if (target) navigate(target.dataset.nav);
+    const nav = event.target.closest('[data-nav]');
+    if (nav) return navigate(nav.dataset.nav);
+
+    const edit = event.target.closest('[data-edit]');
+    if (edit) return openEdit(edit.dataset.edit);
+
+    const del = event.target.closest('[data-delete]');
+    if (del) return openDeleteProject(del.dataset.delete);
+  });
+
+  document.querySelectorAll('[data-close="edit"]').forEach((el) => (el.onclick = closeEdit));
+  document.querySelectorAll('[data-close="delete-project"]').forEach((el) => (el.onclick = closeDeleteProject));
+  document.getElementById('edit-save').onclick = saveEdit;
+  document.getElementById('confirm-delete-project').onclick = confirmDeleteProject;
+  document.getElementById('edit-idea').addEventListener('input', (e) => {
+    document.getElementById('edit-idea-count').textContent = e.target.value.length;
   });
   document.querySelectorAll('[data-close="confirm"]').forEach((el) => (el.onclick = closeConfirm));
   document.getElementById('signout-btn').onclick = logout;
@@ -534,7 +731,10 @@ function closeConfirm() {
   document.getElementById('user-bio').addEventListener('input', () => updateCharCount('user-bio', 'bio-count', 150));
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeConfirm();
+    if (event.key !== 'Escape') return;
+    closeConfirm();
+    closeEdit();
+    closeDeleteProject();
   });
 
   try {

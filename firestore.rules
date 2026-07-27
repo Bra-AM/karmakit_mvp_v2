@@ -63,13 +63,19 @@ service cloud.firestore {
         && text(request.resource.data.name, 1, 50)
         && text(request.resource.data.idea, 20, 350)
         && httpUrl(request.resource.data.link)
+        && httpUrl(request.resource.data.website)
         && httpUrl(request.resource.data.logo);
 
+      // Owners may revise their own post. ownerId and createdAt must survive
+      // the edit untouched, so an edit cannot reassign a project to someone
+      // else or move it to the top of the feed by backdating it.
       allow update: if isSelf(resource.data.ownerId)
         && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt
         && text(request.resource.data.name, 1, 50)
         && text(request.resource.data.idea, 20, 350)
         && httpUrl(request.resource.data.link)
+        && httpUrl(request.resource.data.website)
         && httpUrl(request.resource.data.logo);
 
       allow delete: if isSelf(resource.data.ownerId);

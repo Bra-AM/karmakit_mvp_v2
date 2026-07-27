@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Submit Idea - KarmaKit</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3"/>
+  <link rel="stylesheet" href="style.css?v=4"/>
 </head>
 <body>
   <header class="enhanced-header">
@@ -73,14 +73,20 @@
       <p class="optional-divider"><span>Optional extras</span></p>
 
       <label>
-        Project Link
-        <input type="url" id="comp-link" placeholder="https://your-project.com (optional)">
-        <small class="field-hint">Link to your live project, GitHub repo, or demo. Must start with http:// or https://</small>
+        Try it link
+        <input type="url" id="comp-link" placeholder="https://demo.your-project.com">
+        <small class="field-hint">Where reviewers can actually use it — a live demo, an app, or a GitHub repo. Projects people can try get far more useful feedback.</small>
+      </label>
+
+      <label>
+        Project website
+        <input type="url" id="comp-website" placeholder="https://your-project.com">
+        <small class="field-hint">Your landing page, if it's somewhere different.</small>
       </label>
 
       <label>
         Logo URL
-        <input type="url" id="comp-logo" placeholder="https://example.com/logo.png (optional)">
+        <input type="url" id="comp-logo" placeholder="https://example.com/logo.png">
         <small class="field-hint">Leave blank and we'll generate an avatar from your project name.</small>
       </label>
 
@@ -169,11 +175,13 @@ function validate() {
   const idea = document.getElementById('comp-idea').value.trim();
   const logo = document.getElementById('comp-logo').value.trim();
   const link = document.getElementById('comp-link').value.trim();
+  const website = document.getElementById('comp-website').value.trim();
 
   if (!name) return 'Project name is required.';
   if (idea.length < 20) return 'Please describe your project in at least 20 characters.';
   if (logo && !safeUrl(logo)) return 'Logo URL must be a valid http:// or https:// address.';
-  if (link && !safeUrl(link)) return 'Project link must be a valid http:// or https:// address.';
+  if (link && !safeUrl(link)) return 'Try it link must be a valid http:// or https:// address.';
+  if (website && !safeUrl(website)) return 'Website must be a valid http:// or https:// address.';
   return null;
 }
 
@@ -199,6 +207,7 @@ async function submitProject(event) {
       idea: document.getElementById('comp-idea').value.trim(),
       // Normalised through safeUrl so only http(s) ever reaches the database.
       link: safeUrl(document.getElementById('comp-link').value.trim()) || '',
+      website: safeUrl(document.getElementById('comp-website').value.trim()) || '',
       logo: safeUrl(document.getElementById('comp-logo').value.trim()) || ''
     });
 
@@ -254,6 +263,7 @@ function closeSuccessModal() {
   });
   document.getElementById('comp-logo').addEventListener('input', refreshSubmitState);
   document.getElementById('comp-link').addEventListener('input', refreshSubmitState);
+  document.getElementById('comp-website').addEventListener('input', refreshSubmitState);
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeSuccessModal();

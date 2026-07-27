@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KarmaKit - Help Builders Get Users & Feedback</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <header class="enhanced-header">
@@ -205,7 +205,11 @@ async function renderCard() {
   }
 
   const container = document.getElementById('card-container');
+  // Prefer the "try it" link — reviewers giving feedback need the working
+  // thing, not the marketing page. Fall back to the website if there's no demo.
   const link = safeUrl(project.link);
+  const website = safeUrl(project.website);
+  const primary = link || website;
 
   // Counts come from aggregation queries rather than a stored number, so they
   // reflect what other users have actually done.
@@ -218,6 +222,9 @@ async function renderCard() {
         <div class="card-title-section">
           <h2>${esc(project.name)}</h2>
           <div class="project-badge">by ${esc(project.ownerName || 'a builder')}</div>
+          ${link && website
+            ? `<a class="card-secondary-link" href="${esc(website)}" target="_blank" rel="noopener noreferrer">Website ↗</a>`
+            : ''}
         </div>
       </div>
       <div class="card-body">
@@ -241,9 +248,9 @@ async function renderCard() {
         </div>
       </div>
       <div class="card-actions">
-        ${link
-          ? `<a class="card-btn visit-btn" href="${esc(link)}" target="_blank" rel="noopener noreferrer">
-               <span class="btn-icon">🔗</span> Visit Project
+        ${primary
+          ? `<a class="card-btn visit-btn" href="${esc(primary)}" target="_blank" rel="noopener noreferrer">
+               <span class="btn-icon">🔗</span> ${link ? 'Try it out' : 'Visit website'}
              </a>`
           : `<button class="card-btn visit-btn" disabled>
                <span class="btn-icon">🔗</span> No link provided

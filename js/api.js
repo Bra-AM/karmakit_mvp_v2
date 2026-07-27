@@ -13,6 +13,8 @@ import {
   doc,
   addDoc,
   setDoc,
+  updateDoc,
+  deleteDoc,
   getDoc,
   getDocs,
   getCountFromServer,
@@ -27,17 +29,43 @@ const FEED_LIMIT = 100;
 
 /* ---------------------------------------------------------------- projects */
 
-export async function createProject(user, { name, idea, link, logo }) {
+export async function createProject(user, { name, idea, link, website, logo }) {
   const ref = await addDoc(collection(db, 'projects'), {
     name,
     idea,
     link: link || '',
+    website: website || '',
     logo: logo || '',
     ownerId: user.uid,
     ownerName: user.displayName || user.email.split('@')[0],
     createdAt: serverTimestamp()
   });
   return ref.id;
+}
+
+/**
+ * Owners can revise a project after posting. Only these fields are writable —
+ * ownerId and createdAt are deliberately absent so an edit cannot reassign a
+ * project or backdate it, and firestore.rules enforces the same.
+ */
+export function updateProject(projectId, { name, idea, link, website, logo }) {
+  return updateDoc(doc(db, 'projects', projectId), {
+    name,
+    idea,
+    link: link || '',
+    website: website || '',
+    logo: logo || '',
+    updatedAt: serverTimestamp()
+  });
+}
+
+/**
+ * Deletes the project only. Votes and comments that referenced it are left in
+ * place, which keeps everyone's karma honest: feedback someone genuinely gave
+ * should not be erased because the recipient removed their project.
+ */
+export function deleteProject(projectId) {
+  return deleteDoc(doc(db, 'projects', projectId));
 }
 
 export async function getProject(projectId) {

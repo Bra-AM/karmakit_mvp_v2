@@ -1016,11 +1016,16 @@ body {
   gap: 1rem;
 }
 
+/* Wraps rather than forcing everything onto one line. This card holds a
+   header, a stats group, action buttons and a feedback block; as a
+   single-line flex row they each collapsed into an unreadable narrow column. */
 .project-card {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  gap: 0.75rem 1rem;
+  padding: 1.15rem;
   background: rgba(48, 31, 79, 0.02);
   border-radius: 12px;
   border: 1px solid rgba(48, 31, 79, 0.1);
@@ -1033,10 +1038,45 @@ body {
 
 .project-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
-  flex: 1;
+  /* A real flex-basis, so the description has room before anything wraps. */
+  flex: 1 1 260px;
+  min-width: 0;
 }
+
+.project-info { min-width: 0; }
+.project-stats { flex: 0 0 auto; }
+
+/* Full-width rows beneath the header line. */
+.project-card .project-actions,
+.project-card .feedback-block,
+.project-card .feedback-empty {
+  flex: 1 1 100%;
+}
+
+.project-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.btn-tiny {
+  background: rgba(48, 31, 79, 0.07);
+  border: none;
+  padding: 0.42rem 0.9rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-tiny:hover { background: rgba(48, 31, 79, 0.14); }
+.btn-tiny.danger { color: #b3261e; }
+.btn-tiny.danger:hover { background: rgba(244, 67, 54, 0.14); }
 
 .project-header img {
   width: 48px;
@@ -1721,3 +1761,14 @@ button .spinner,
   height: 1px;
   background: rgba(48, 31, 79, 0.12);
 }
+
+.card-secondary-link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-decoration: none;
+}
+
+.card-secondary-link:hover { color: var(--primary); text-decoration: underline; }
