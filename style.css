@@ -1700,3 +1700,24 @@ button .spinner,
   border: 1px solid rgba(76, 175, 80, 0.35);
   color: #2e6930;
 }
+
+/* Separates the two required fields from the optional ones on the submit form. */
+.optional-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.optional-divider::before,
+.optional-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(48, 31, 79, 0.12);
+}

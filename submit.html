@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Submit Idea - KarmaKit</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2"/>
+  <link rel="stylesheet" href="style.css?v=3"/>
 </head>
 <body>
   <header class="enhanced-header">
@@ -64,22 +64,24 @@
       </label>
 
       <label>
-        Logo URL
-        <input type="url" id="comp-logo" placeholder="https://example.com/logo.png (optional)">
-        <small class="field-hint">Optional. Leave blank and we'll generate an avatar from your project name.</small>
-      </label>
-
-      <label>
-        Project Link
-        <input type="url" id="comp-link" placeholder="https://your-project.com (optional)">
-        <small class="field-hint">Optional: link to your live project, GitHub repo, or demo. Must start with http:// or https://</small>
-      </label>
-
-      <label>
         Project Description *
         <textarea id="comp-idea" required minlength="20" maxlength="350" rows="5"
           placeholder="Describe your project. What problem does it solve? What makes it unique?"></textarea>
         <span class="char-counter"><span id="idea-count">0</span>/350 &middot; minimum 20</span>
+      </label>
+
+      <p class="optional-divider"><span>Optional extras</span></p>
+
+      <label>
+        Project Link
+        <input type="url" id="comp-link" placeholder="https://your-project.com (optional)">
+        <small class="field-hint">Link to your live project, GitHub repo, or demo. Must start with http:// or https://</small>
+      </label>
+
+      <label>
+        Logo URL
+        <input type="url" id="comp-logo" placeholder="https://example.com/logo.png (optional)">
+        <small class="field-hint">Leave blank and we'll generate an avatar from your project name.</small>
       </label>
 
       <div class="submission-benefits">
