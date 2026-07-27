@@ -1,0 +1,502 @@
+/* ==========================================================================
+   KarmaKit landing / sign-in page.
+   Loaded only by login.html, after style.css.
+   ========================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 3rem);
+  display: flex;
+  position: relative;
+  background: #f6f3fc;
+  /* No overflow:hidden here — this element is the body, and hiding overflow
+     stops the page scrolling. The aurora is clipped by its own container. */
+}
+
+/* Soft colour wash behind everything. Pointer-events off so it never
+   intercepts clicks on the form. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.aurora span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+}
+
+.aurora span:nth-child(1) {
+  width: 46vw; height: 46vw;
+  background: #b79bff;
+  top: -14vw; left: -10vw;
+  animation: drift 22s ease-in-out infinite;
+}
+
+.aurora span:nth-child(2) {
+  width: 38vw; height: 38vw;
+  background: #f7c94b;
+  bottom: -14vw; right: -8vw;
+  animation: drift 28s ease-in-out infinite reverse;
+}
+
+.aurora span:nth-child(3) {
+  width: 30vw; height: 30vw;
+  background: #7ee0c9;
+  top: 45%; left: 42%;
+  opacity: 0.28;
+  animation: drift 34s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(4vw, -3vw) scale(1.12); }
+}
+
+.auth-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  max-width: 1140px;
+  width: 100%;
+  align-items: center;
+  /* Centres via auto margins rather than align-items on the parent. With
+     flex centring, content taller than the viewport overflows past the top
+     edge and becomes unreachable; auto margins stay scrollable. */
+  margin: auto;
+}
+
+/* --------------------------------------------------------------- pitch -- */
+
+.auth-pitch > * {
+  animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.25, 1) backwards;
+}
+.auth-pitch > *:nth-child(1) { animation-delay: 0.05s; }
+.auth-pitch > *:nth-child(2) { animation-delay: 0.12s; }
+.auth-pitch > *:nth-child(3) { animation-delay: 0.19s; }
+.auth-pitch > *:nth-child(4) { animation-delay: 0.26s; }
+.auth-pitch > *:nth-child(5) { animation-delay: 0.33s; }
+.auth-pitch > *:nth-child(6) { animation-delay: 0.40s; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 2rem;
+}
+
+.brand-row img {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  box-shadow: 0 4px 14px rgba(48, 31, 79, 0.18);
+}
+
+.brand-row .brand-text { display: flex; flex-direction: column; }
+
+.brand-row h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.brand-row .tagline {
+  font-size: 0.78rem;
+  color: var(--text-gray);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(48, 31, 79, 0.12);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 1.1rem;
+  backdrop-filter: blur(8px);
+}
+
+.eyebrow .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
+}
+
+.pitch-title {
+  font-size: clamp(2.1rem, 4.4vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.pitch-title em {
+  font-style: normal;
+  background: linear-gradient(100deg, #7c4dff 0%, #c2410c 55%, #f7c94b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pitch-copy {
+  color: #574a6f;
+  font-size: clamp(0.98rem, 1.3vw, 1.08rem);
+  line-height: 1.65;
+  max-width: 44ch;
+  margin-bottom: 1.9rem;
+}
+
+/* The reciprocity loop — the core idea, shown rather than explained. */
+.loop {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-bottom: 1.9rem;
+  flex-wrap: wrap;
+}
+
+.loop-step {
+  flex: 1 1 0;
+  min-width: 120px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(48, 31, 79, 0.1);
+  border-radius: 14px;
+  padding: 0.85rem 0.8rem;
+  backdrop-filter: blur(10px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.loop-step:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(48, 31, 79, 0.12);
+}
+
+.loop-step .n {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--accent-hover);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.loop-step strong {
+  display: block;
+  font-size: 0.86rem;
+  color: var(--primary);
+  margin-bottom: 0.15rem;
+}
+
+.loop-step span.sub {
+  font-size: 0.74rem;
+  color: var(--text-gray);
+  line-height: 1.35;
+}
+
+/* Product preview — show the thing, don't just describe it. */
+.preview {
+  position: relative;
+  max-width: 340px;
+}
+
+.preview-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-gray);
+  font-weight: 600;
+  margin-bottom: 0.55rem;
+}
+
+.preview-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.1rem;
+  box-shadow: 0 18px 44px rgba(48, 31, 79, 0.17);
+  border: 1px solid rgba(48, 31, 79, 0.07);
+  transform: rotate(-1.6deg);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.preview-card:hover { transform: rotate(0deg) translateY(-4px); }
+
+.preview-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.preview-avatar {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #2d6a4f, #1b5e8c);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.preview-head h4 {
+  font-size: 0.98rem;
+  color: var(--primary);
+  margin: 0 0 0.1rem;
+}
+
+.preview-head .by { font-size: 0.73rem; color: var(--text-gray); }
+
+.preview-card p.idea {
+  font-size: 0.86rem;
+  color: #4a4060;
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+
+.preview-stats {
+  display: flex;
+  gap: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(48, 31, 79, 0.08);
+  font-size: 0.76rem;
+  color: var(--text-gray);
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.preview-actions span {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 9px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.preview-actions .pass { background: rgba(48, 31, 79, 0.07); color: var(--text-gray); }
+.preview-actions .love { background: linear-gradient(135deg, var(--accent), #f4d467); color: var(--primary); }
+
+/* ----------------------------------------------------------- auth card -- */
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  border-radius: 22px;
+  box-shadow: 0 22px 60px rgba(48, 31, 79, 0.16);
+  padding: clamp(1.5rem, 2.4vw, 2.1rem);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  animation: rise 0.75s cubic-bezier(0.2, 0.8, 0.25, 1) 0.15s backwards;
+}
+
+.auth-card h2 {
+  font-size: 1.32rem;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.015em;
+}
+
+.auth-card .card-sub {
+  font-size: 0.84rem;
+  color: var(--text-gray);
+  margin-bottom: 1.3rem;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(48, 31, 79, 0.07);
+  border-radius: 12px;
+  padding: 0.28rem;
+  margin-bottom: 1.3rem;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 0.62rem;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.auth-tab.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(48, 31, 79, 0.12);
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.82rem;
+  border: 1.5px solid rgba(48, 31, 79, 0.16);
+  border-radius: 11px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.google-btn:hover {
+  border-color: rgba(48, 31, 79, 0.3);
+  box-shadow: 0 6px 18px rgba(48, 31, 79, 0.12);
+  transform: translateY(-1px);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.15rem 0;
+  color: var(--text-gray);
+  font-size: 0.76rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(48, 31, 79, 0.13);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* The bug this replaces: a bare `display:flex` above beats the `hidden`
+   attribute's built-in `display:none`, so BOTH forms rendered at once.
+   Any rule that sets display on a toggled element needs this partner. */
+.auth-form[hidden] { display: none; }
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--primary);
+}
+
+.auth-form input {
+  padding: 0.78rem 0.85rem;
+  border: 1.5px solid rgba(48, 31, 79, 0.14);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.93rem;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.auth-form input::placeholder { color: #a99fbb; }
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3.5px rgba(48, 31, 79, 0.11);
+}
+
+.forgot-link {
+  align-self: flex-end;
+  font-size: 0.78rem;
+  margin-top: -0.35rem;
+}
+
+.auth-submit {
+  padding: 0.88rem;
+  border-radius: 11px;
+  font-size: 0.97rem;
+  font-weight: 600;
+  justify-content: center;
+  margin-top: 0.2rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: #3d2865;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(48, 31, 79, 0.28);
+}
+
+.auth-legal {
+  margin-top: 1.15rem;
+  font-size: 0.73rem;
+  color: var(--text-gray);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.auth-legal a { color: var(--primary); font-weight: 500; }
+
+/* -------------------------------------------------------------- mobile -- */
+
+@media (max-width: 900px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+    max-width: 460px;
+  }
+  .preview { display: none; }
+  .loop { gap: 0.4rem; }
+  .loop-step { min-width: 0; padding: 0.7rem 0.55rem; }
+  .loop-step span.sub { display: none; }
+  .pitch-copy { margin-bottom: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .auth-page { padding: 1.25rem 1rem 2rem; }
+  .pitch-title { font-size: 1.95rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span { animation: none; }
+  .auth-pitch > *, .auth-card { animation: none; }
+  .preview-card { transform: none; }
+}

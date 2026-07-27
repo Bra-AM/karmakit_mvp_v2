@@ -1582,222 +1582,6 @@ button .spinner,
   font-size: 1rem;
   object-fit: cover;
 }
-
-/* ---------------------------------------------------------- auth pages -- */
-.auth-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
-}
-
-.auth-layout {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 3rem;
-  max-width: 1050px;
-  width: 100%;
-  align-items: center;
-}
-
-.auth-pitch .logo-section {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
-}
-
-.auth-pitch .logo { width: 48px; height: 48px; border-radius: 10px; }
-.auth-pitch h1 { font-size: 1.5rem; color: var(--primary); margin: 0; }
-.auth-pitch .tagline { font-size: 0.85rem; color: var(--text-gray); margin: 0; }
-
-.pitch-title {
-  font-size: 2.4rem;
-  line-height: 1.2;
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.pitch-copy {
-  color: var(--text-gray);
-  margin-bottom: 1.75rem;
-  max-width: 46ch;
-}
-
-.pitch-list { list-style: none; padding: 0; margin: 0 0 2rem 0; }
-
-.pitch-list li {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.4rem 0;
-  color: var(--text-dark);
-  font-size: 0.95rem;
-}
-
-.pitch-karma {
-  background: var(--text-light);
-  border: 1px solid rgba(247, 201, 75, 0.4);
-  border-radius: var(--border-radius);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-light);
-}
-
-.pitch-karma h4 { color: var(--primary); font-size: 0.9rem; margin-bottom: 0.75rem; }
-
-.pitch-karma-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  text-align: center;
-}
-
-.pitch-karma-grid strong {
-  display: block;
-  font-size: 1.4rem;
-  color: var(--accent-hover);
-}
-
-.pitch-karma-grid span { font-size: 0.75rem; color: var(--text-gray); }
-
-.auth-card {
-  background: var(--text-light);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-medium);
-  padding: 2rem;
-  border: 1px solid rgba(48, 31, 79, 0.08);
-}
-
-.auth-tabs {
-  display: flex;
-  gap: 0.25rem;
-  background: rgba(48, 31, 79, 0.06);
-  border-radius: 10px;
-  padding: 0.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.auth-tab {
-  flex: 1;
-  padding: 0.6rem;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text-gray);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.auth-tab.active {
-  background: var(--text-light);
-  color: var(--primary);
-  box-shadow: var(--shadow-light);
-}
-
-.google-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 0.8rem;
-  border: 1px solid rgba(48, 31, 79, 0.2);
-  border-radius: 10px;
-  background: var(--text-light);
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.google-btn:hover { background: #f7f5fb; box-shadow: var(--shadow-light); }
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 1.25rem 0;
-  color: var(--text-gray);
-  font-size: 0.8rem;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(48, 31, 79, 0.12);
-}
-
-.auth-form { display: flex; flex-direction: column; gap: 1rem; }
-
-.auth-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: var(--primary);
-}
-
-.auth-form input {
-  padding: 0.75rem;
-  border: 2px solid rgba(48, 31, 79, 0.1);
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  transition: var(--transition);
-}
-
-.auth-form input:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(48, 31, 79, 0.1);
-}
-
-.forgot-link { align-self: flex-start; font-size: 0.8rem; }
-
-.auth-submit {
-  padding: 0.85rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  justify-content: center;
-}
-
-.auth-error,
-.auth-notice {
-  padding: 0.7rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.auth-error {
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid rgba(244, 67, 54, 0.35);
-  color: #b3261e;
-}
-
-.auth-notice {
-  background: rgba(76, 175, 80, 0.1);
-  border: 1px solid rgba(76, 175, 80, 0.35);
-  color: #2e6930;
-}
-
-.auth-legal {
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  color: var(--text-gray);
-  text-align: center;
-}
-
-.auth-legal a { color: var(--primary); }
-
 /* -------------------------------------------------------- legal pages -- */
 .legal-page {
   max-width: 760px;
@@ -1850,11 +1634,6 @@ button .spinner,
   font-style: italic;
 }
 
-@media (max-width: 860px) {
-  .auth-layout { grid-template-columns: 1fr; gap: 2rem; }
-  .pitch-title { font-size: 1.9rem; }
-  .auth-pitch .pitch-list, .auth-pitch .pitch-karma { display: none; }
-}
 
 /* ------------------------------------------------- feedback on projects -- */
 .feedback-block {
@@ -1895,4 +1674,26 @@ button .spinner,
   color: var(--text-gray);
   font-style: italic;
   width: 100%;
+}
+
+/* Inline form messages. Used by the submit form, the delete-account dialog
+   and the login page, so these live here rather than in landing.css. */
+.auth-error,
+.auth-notice {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.auth-error {
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.35);
+  color: #b3261e;
+}
+
+.auth-notice {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: #2e6930;
 }
