@@ -1,0 +1,141 @@
+rules_version = '2';
+
+// KarmaKit access control.
+//
+// This file is the security boundary. The browser code in js/ is a convenience
+// layer that anyone can bypass with the devtools console — these rules are what
+// actually stop them. Deploy with:  firebase deploy --only firestore:rules
+//
+// Karma is never stored, so there is no karma field to protect. Instead we
+// protect the documents karma is counted from: one vote per person per project,
+// no voting or reviewing your own work, and no editing someone else's record.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function text(value, minLen, maxLen) {
+      return value is string && value.size() >= minLen && value.size() <= maxLen;
+    }
+
+    // Blocks javascript: and data: URLs at the database layer, so a bad link
+    // cannot be planted by calling the SDK directly and bypassing our form.
+    function httpUrl(value) {
+      return value is string && (value == '' || value.matches('https?://.+'));
+    }
+
+    function projectOwner(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId;
+    }
+
+    /* ------------------------------------------------------------- users */
+    match /users/{uid} {
+      // Profiles are visible to signed-in builders so names show on projects.
+      allow read: if signedIn();
+
+      allow create: if isSelf(uid)
+        && text(request.resource.data.displayName, 1, 50)
+        // Email comes from the verified auth token, not from user input.
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if isSelf(uid)
+        && text(request.resource.data.displayName, 1, 50)
+        && text(request.resource.data.company, 0, 100)
+        && text(request.resource.data.bio, 0, 150)
+        // Email is immutable here; changing it must go through Firebase Auth.
+        && request.resource.data.email == resource.data.email;
+
+      allow delete: if isSelf(uid);
+    }
+
+    /* ---------------------------------------------------------- projects */
+    match /projects/{projectId} {
+      allow read: if signedIn();
+
+      allow create: if isSelf(request.resource.data.ownerId)
+        && text(request.resource.data.name, 1, 50)
+        && text(request.resource.data.idea, 20, 350)
+        && httpUrl(request.resource.data.link)
+        && httpUrl(request.resource.data.logo);
+
+      allow update: if isSelf(resource.data.ownerId)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && text(request.resource.data.name, 1, 50)
+        && text(request.resource.data.idea, 20, 350)
+        && httpUrl(request.resource.data.link)
+        && httpUrl(request.resource.data.logo);
+
+      allow delete: if isSelf(resource.data.ownerId);
+    }
+
+    /* ------------------------------------------------------------- votes */
+    match /votes/{voteId} {
+      // Readable so the feed can count likes. Note this also makes "who passed
+      // on what" visible to signed-in users — see SETUP.md, "Known tradeoffs".
+      allow read: if signedIn();
+
+      // The document ID is pinned to projectId_uid. That is what makes one vote
+      // per person per project structurally impossible to exceed: a second vote
+      // overwrites the first rather than adding a new document, so the count —
+      // and therefore the karma — cannot grow past one.
+      allow create, update: if signedIn()
+        && voteId == request.resource.data.projectId + '_' + request.auth.uid
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.type in ['like', 'pass']
+        // No karma for reviewing your own project.
+        && request.resource.data.projectOwnerId != request.auth.uid
+        // The claimed owner must match the real project document.
+        && request.resource.data.projectOwnerId == projectOwner(request.resource.data.projectId);
+
+      allow delete: if isSelf(resource.data.userId);
+    }
+
+    /* ---------------------------------------------------------- comments */
+    match /comments/{commentId} {
+      allow read: if signedIn();
+
+      allow create: if isSelf(request.resource.data.userId)
+        // Minimum length is the cheapest available quality floor: it stops
+        // "ok" being farmed for +3 karma across every project in the feed.
+        && text(request.resource.data.text, 10, 500)
+        && request.resource.data.wantsConnection is bool
+        && request.resource.data.projectOwnerId != request.auth.uid
+        && request.resource.data.projectOwnerId == projectOwner(request.resource.data.projectId);
+
+      // Immutable once posted, so a builder cannot be shown one thing and
+      // have it rewritten later. Authors may delete instead.
+      allow update: if false;
+      allow delete: if isSelf(resource.data.userId);
+    }
+
+    /* ------------------------------------------------------- connections */
+    match /connections/{connectionId} {
+      // Contact details, so strictly the two parties involved. Queries must be
+      // filtered by one of these fields or Firestore rejects them outright.
+      allow read: if signedIn()
+        && (resource.data.toUserId == request.auth.uid
+            || resource.data.fromUserId == request.auth.uid);
+
+      allow create: if isSelf(request.resource.data.fromUserId)
+        && text(request.resource.data.fromEmail, 3, 254)
+        && text(request.resource.data.message, 0, 500)
+        && request.resource.data.toUserId != request.auth.uid
+        && request.resource.data.toUserId == projectOwner(request.resource.data.projectId);
+
+      allow update: if false;
+      allow delete: if isSelf(resource.data.fromUserId) || isSelf(resource.data.toUserId);
+    }
+
+    // Anything not matched above is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

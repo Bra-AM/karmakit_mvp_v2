@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - KarmaKit</title>
+  <meta name="description" content="KarmaKit is a feedback exchange for hackathons and demo days. Builders get users. Reviewers earn karma.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <!-- Left: the pitch. This doubles as the public front door for karmakitapp.com -->
+    <section class="auth-pitch">
+      <div class="logo-section">
+        <img src="karmakit-logo.png" class="logo" alt="KarmaKit">
+        <div class="brand-text">
+          <h1>KarmaKit</h1>
+          <p class="tagline">Help builders get users and validate ideas</p>
+        </div>
+      </div>
+
+      <h2 class="pitch-title">Feedback, traded fairly.</h2>
+      <p class="pitch-copy">
+        Post your project, get honest reactions from other builders, and earn karma
+        for the feedback you give back. Built for hackathons, demo days and
+        startup communities.
+      </p>
+
+      <ul class="pitch-list">
+        <li><span>🚀</span> Submit a project and get real users testing it</li>
+        <li><span>💬</span> Leave feedback, earn karma, climb the leaderboard</li>
+        <li><span>🤝</span> Connect with builders working on adjacent problems</li>
+      </ul>
+
+      <div class="pitch-karma">
+        <h4>How karma works</h4>
+        <div class="pitch-karma-grid">
+          <div><strong>+5</strong><span>Submit a project</span></div>
+          <div><strong>+3</strong><span>Give feedback</span></div>
+          <div><strong>+2</strong><span>Review a project</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: auth -->
+    <section class="auth-card">
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-signin" role="tab" aria-selected="true">Sign in</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false">Create account</button>
+      </div>
+
+      <button type="button" class="google-btn" id="google-btn">
+        <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
+          <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+          <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
+          <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
+          <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <p class="auth-notice" id="auth-notice" role="status" hidden></p>
+
+      <!-- Sign in -->
+      <form id="signin-form" class="auth-form">
+        <label>
+          Email
+          <input type="email" id="signin-email" required autocomplete="email" placeholder="you@example.com">
+        </label>
+        <label>
+          Password
+          <input type="password" id="signin-password" required autocomplete="current-password" placeholder="Your password">
+        </label>
+        <button type="button" class="link-btn forgot-link" id="forgot-btn">Forgot your password?</button>
+        <button type="submit" class="btn-primary auth-submit" id="signin-btn">Sign in</button>
+      </form>
+
+      <!-- Register -->
+      <form id="register-form" class="auth-form" hidden>
+        <label>
+          Your name *
+          <input type="text" id="register-name" required maxlength="50" autocomplete="name" placeholder="Ada Lovelace">
+        </label>
+        <label>
+          Email *
+          <input type="email" id="register-email" required autocomplete="email" placeholder="you@example.com">
+        </label>
+        <label>
+          Password *
+          <input type="password" id="register-password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
+        </label>
+        <label>
+          Company / school
+          <input type="text" id="register-company" maxlength="100" autocomplete="organization" placeholder="Optional">
+        </label>
+        <button type="submit" class="btn-primary auth-submit" id="register-btn">Create account</button>
+      </form>
+
+      <p class="auth-legal">
+        By continuing you agree to our <a href="terms.html">Terms</a> and
+        <a href="privacy.html">Privacy Policy</a>.
+      </p>
+    </section>
+  </main>
+
+  <div class="toast" id="success-toast">
+    <div class="toast-content">
+      <span class="toast-icon">🎉</span>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
+<script type="module">
+import { currentUser, loginWithEmail, loginWithGoogle, registerWithEmail, resetPassword } from './js/auth.js';
+import { authErrorMessage, setBusy } from './js/ui.js';
+
+// Only same-page targets are accepted here — an open redirect would let a
+// phishing link bounce users off our domain after a real sign-in.
+const ALLOWED_NEXT = ['index.html', 'submit.html', 'profile.html'];
+const requested = new URLSearchParams(window.location.search).get('next');
+const next = ALLOWED_NEXT.includes(requested) ? requested : 'index.html';
+
+const errorEl = document.getElementById('auth-error');
+const noticeEl = document.getElementById('auth-notice');
+
+function showError(message) {
+  noticeEl.hidden = true;
+  errorEl.textContent = message;
+  errorEl.hidden = false;
+}
+
+function showNotice(message) {
+  errorEl.hidden = true;
+  noticeEl.textContent = message;
+  noticeEl.hidden = false;
+}
+
+function clearMessages() {
+  errorEl.hidden = true;
+  noticeEl.hidden = true;
+}
+
+/* Tabs */
+const signinForm = document.getElementById('signin-form');
+const registerForm = document.getElementById('register-form');
+const signinTab = document.getElementById('tab-signin');
+const registerTab = document.getElementById('tab-register');
+
+function selectTab(mode) {
+  const signingIn = mode === 'signin';
+  signinTab.classList.toggle('active', signingIn);
+  registerTab.classList.toggle('active', !signingIn);
+  signinTab.setAttribute('aria-selected', String(signingIn));
+  registerTab.setAttribute('aria-selected', String(!signingIn));
+  signinForm.hidden = !signingIn;
+  registerForm.hidden = signingIn;
+  clearMessages();
+}
+
+signinTab.onclick = () => selectTab('signin');
+registerTab.onclick = () => selectTab('register');
+
+/* Already signed in? Skip the form. */
+currentUser().then((user) => {
+  if (user) window.location = next;
+});
+
+/* Email + password */
+signinForm.onsubmit = async (event) => {
+  event.preventDefault();
+  clearMessages();
+  const button = document.getElementById('signin-btn');
+  setBusy(button, true, 'Signing in...');
+  try {
+    await loginWithEmail({
+      email: document.getElementById('signin-email').value.trim(),
+      password: document.getElementById('signin-password').value
+    });
+    window.location = next;
+  } catch (error) {
+    showError(authErrorMessage(error));
+    setBusy(button, false);
+  }
+};
+
+registerForm.onsubmit = async (event) => {
+  event.preventDefault();
+  clearMessages();
+  const button = document.getElementById('register-btn');
+  const name = document.getElementById('register-name').value.trim();
+  if (!name) {
+    showError('Please enter your name.');
+    return;
+  }
+  setBusy(button, true, 'Creating account...');
+  try {
+    await registerWithEmail({
+      email: document.getElementById('register-email').value.trim(),
+      password: document.getElementById('register-password').value,
+      displayName: name,
+      company: document.getElementById('register-company').value.trim()
+    });
+    window.location = next;
+  } catch (error) {
+    showError(authErrorMessage(error));
+    setBusy(button, false);
+  }
+};
+
+/* Google */
+document.getElementById('google-btn').onclick = async (event) => {
+  clearMessages();
+  setBusy(event.currentTarget, true, 'Opening Google...');
+  try {
+    await loginWithGoogle();
+    window.location = next;
+  } catch (error) {
+    showError(authErrorMessage(error));
+    setBusy(event.currentTarget, false);
+  }
+};
+
+/* Password reset */
+document.getElementById('forgot-btn').onclick = async () => {
+  const email = document.getElementById('signin-email').value.trim();
+  if (!email) {
+    showError('Enter your email above first, then click again.');
+    return;
+  }
+  try {
+    await resetPassword(email);
+    // Deliberately not confirming whether the address exists.
+    showNotice(`If an account exists for ${email}, a reset link is on its way.`);
+  } catch (error) {
+    showError(authErrorMessage(error));
+  }
+};
+</script>
+</body>
+</html>

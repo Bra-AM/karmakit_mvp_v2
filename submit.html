@@ -18,15 +18,15 @@
         </div>
       </div>
       <nav class="main-nav">
-        <button class="nav-btn" onclick="navigate('index.html')">
+        <button class="nav-btn" data-nav="index.html">
           <span class="nav-icon">🏠</span>
           Home
         </button>
-        <button class="nav-btn active" onclick="navigate('submit.html')">
+        <button class="nav-btn active" data-nav="submit.html">
           <span class="nav-icon">🚀</span>
           Submit Idea
         </button>
-        <button class="nav-btn" onclick="navigate('profile.html')">
+        <button class="nav-btn" data-nav="profile.html">
           <span class="nav-icon">👤</span>
           Profile
         </button>
@@ -39,6 +39,7 @@
         <span class="karma-label">Karma</span>
       </div>
       <p id="greeting" class="user-greeting"></p>
+      <button class="link-btn signout-btn" id="signout-btn">Sign out</button>
     </div>
   </header>
 
@@ -54,48 +55,31 @@
         <p>Fill out the information below to showcase your project to other builders.</p>
       </div>
 
+      <p class="auth-error" id="form-error" role="alert" hidden></p>
+
       <label>
         Project Name *
-        <input 
-          type="text" 
-          id="comp-name" 
-          required 
-          maxlength="50"
-          placeholder="e.g., EcoTrack, StudyBuddy, FoodieMatch"
-        >
+        <input type="text" id="comp-name" required maxlength="50" placeholder="e.g., EcoTrack, StudyBuddy, FoodieMatch">
         <span class="char-counter"><span id="name-count">0</span>/50</span>
       </label>
 
       <label>
         Logo URL
-        <input 
-          type="url" 
-          id="comp-logo"
-          placeholder="https://example.com/logo.png (optional)"
-        >
-        <small class="field-hint">Optional: Add a link to your project logo or leave blank for a default placeholder</small>
+        <input type="url" id="comp-logo" placeholder="https://example.com/logo.png (optional)">
+        <small class="field-hint">Optional. Leave blank and we'll generate an avatar from your project name.</small>
       </label>
 
       <label>
         Project Link
-        <input 
-          type="url" 
-          id="comp-link"
-          placeholder="https://your-project.com (optional)"
-        >
-        <small class="field-hint">Optional: Link to your live project, GitHub repo, or demo</small>
+        <input type="url" id="comp-link" placeholder="https://your-project.com (optional)">
+        <small class="field-hint">Optional: link to your live project, GitHub repo, or demo. Must start with http:// or https://</small>
       </label>
 
       <label>
         Project Description *
-        <textarea 
-          id="comp-idea" 
-          required 
-          maxlength="200"
-          placeholder="Describe your project in one compelling sentence. What problem does it solve? What makes it unique?"
-          rows="4"
-        ></textarea>
-        <span class="char-counter"><span id="idea-count">0</span>/200</span>
+        <textarea id="comp-idea" required minlength="20" maxlength="350" rows="5"
+          placeholder="Describe your project. What problem does it solve? What makes it unique?"></textarea>
+        <span class="char-counter"><span id="idea-count">0</span>/350 &middot; minimum 20</span>
       </label>
 
       <div class="submission-benefits">
@@ -120,19 +104,18 @@
     </form>
   </main>
 
-  <!-- Success Modal -->
   <div class="modal" id="success-modal">
-    <div class="modal-overlay" onclick="closeSuccessModal()"></div>
+    <div class="modal-overlay" data-close="success"></div>
     <div class="modal-content">
       <div class="modal-header">
         <h2>🎉 Project Submitted!</h2>
-        <button class="close-btn" onclick="closeSuccessModal()">&times;</button>
+        <button class="close-btn" data-close="success">&times;</button>
       </div>
       <div class="modal-body">
         <div class="success-content">
           <div class="success-icon">✅</div>
           <h3>Congratulations!</h3>
-          <p>Your project has been successfully submitted and is now live in the KarmaKit feed.</p>
+          <p>Your project is now live in the KarmaKit feed and other builders can start giving feedback.</p>
           <div class="karma-earned">
             <span class="karma-icon">⭐</span>
             <span>+5 Karma Points Earned!</span>
@@ -140,13 +123,12 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn-secondary" onclick="submitAnother()">Submit Another</button>
-        <button class="btn-primary" onclick="goToFeed()">View in Feed</button>
+        <button class="btn-secondary" id="submit-another">Submit Another</button>
+        <button class="btn-primary" data-nav="index.html">View in Feed</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notifications -->
   <div class="toast" id="success-toast">
     <div class="toast-content">
       <span class="toast-icon">🎉</span>
@@ -154,233 +136,86 @@
     </div>
   </div>
 
-<script>
-// Enhanced utility functions
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+<script type="module">
+import { requireAuth, logout, renderVerifyBanner } from './js/auth.js';
+import * as api from './js/api.js';
+import { safeUrl, navigate, showToast, setBusy } from './js/ui.js';
+
+let user = null;
+const errorEl = document.getElementById('form-error');
+
+function showError(message) {
+  errorEl.textContent = message;
+  errorEl.hidden = false;
 }
 
-function safeSetItem(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (e) {
-    console.error('Storage error:', e);
-    showToast('Unable to save data. Storage might be full.', 'error');
-    return false;
-  }
-}
-
-function safeGetItem(key, fallback = null) {
-  try {
-    return localStorage.getItem(key) || fallback;
-  } catch (e) {
-    console.error('Storage read error:', e);
-    return fallback;
-  }
-}
-
-function getNextId(companies) {
-  return companies.length > 0 ? Math.max(...companies.map(c => c.id)) + 1 : 1;
-}
-
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('success-toast');
-  const messageEl = toast.querySelector('.toast-message');
-  const iconEl = toast.querySelector('.toast-icon');
-  
-  messageEl.textContent = message;
-  iconEl.textContent = type === 'success' ? '🎉' : '⚠️';
-  toast.classList.add('show');
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-function navigate(page) { 
-  document.body.classList.add('page-loading');
-  setTimeout(() => {
-    window.location = page;
-  }, 300);
-}
-
-function addKarma(points) {
-  let k = parseInt(safeGetItem('karma', '0'), 10); 
-  k += points;
-  safeSetItem('karma', k.toString());
-  updateKarmaDisplay();
-}
-
-function updateKarmaDisplay() {
-  document.getElementById('karma-count').textContent = safeGetItem('karma', '0');
-}
-
-function renderGreeting() {
-  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
-  document.getElementById('greeting').textContent = `Welcome, ${profile.user}!`;
-}
-
-// FIXED: Enhanced karma tracking
-function updateKarmaBreakdown(action, points) {
-  const breakdown = JSON.parse(safeGetItem('karmaBreakdown', '{"projectsSubmitted":0,"projectsLiked":0,"feedbackGiven":0,"projectsReviewed":0}'));
-  
-  switch(action) {
-    case 'submit':
-      breakdown.projectsSubmitted += points;
-      break;
-    case 'like':
-      breakdown.projectsLiked += points;
-      break;
-    case 'feedback':
-      breakdown.feedbackGiven += points;
-      break;
-    case 'review':
-      breakdown.projectsReviewed += points;
-      break;
-  }
-  
-  safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
-}
-
-// Form validation functions
-function validateForm() {
-  const name = document.getElementById('comp-name').value.trim();
-  const idea = document.getElementById('comp-idea').value.trim();
-  const logo = document.getElementById('comp-logo').value.trim();
-  const link = document.getElementById('comp-link').value.trim();
-  
-  let isValid = true;
-  let errors = [];
-
-  if (!name) {
-    errors.push('Project name is required');
-    isValid = false;
-  } else if (name.length > 50) {
-    errors.push('Project name must be 50 characters or less');
-    isValid = false;
-  }
-
-  if (!idea) {
-    errors.push('Project description is required');
-    isValid = false;
-  } else if (idea.length > 200) {
-    errors.push('Project description must be 200 characters or less');
-    isValid = false;
-  }
-
-  if (logo && !isValidUrl(logo)) {
-    errors.push('Logo URL must be a valid URL');
-    isValid = false;
-  }
-
-  if (link && !isValidUrl(link)) {
-    errors.push('Project link must be a valid URL');
-    isValid = false;
-  }
-
-  document.getElementById('submit-btn').disabled = !isValid;
-  return { isValid, errors };
-}
-
-function isValidUrl(string) {
-  try {
-    new URL(string);
-    return true;
-  } catch (_) {
-    return false;
-  }
+async function refreshKarma() {
+  const karma = await api.getKarma(user.uid);
+  document.getElementById('karma-count').textContent = karma.total;
 }
 
 function updateCharCount(inputId, countId, maxLength) {
   const input = document.getElementById(inputId);
   const counter = document.getElementById(countId);
-  const length = input.value.length;
-  
-  counter.textContent = length;
-  counter.style.color = length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
-  
-  validateForm();
+  counter.textContent = input.value.length;
+  counter.style.color = input.value.length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
 }
 
-// FIXED: Enhanced form submission with user association
-function submitIdea(event) {
+/** Returns an error string, or null when the form is good to send. */
+function validate() {
+  const name = document.getElementById('comp-name').value.trim();
+  const idea = document.getElementById('comp-idea').value.trim();
+  const logo = document.getElementById('comp-logo').value.trim();
+  const link = document.getElementById('comp-link').value.trim();
+
+  if (!name) return 'Project name is required.';
+  if (idea.length < 20) return 'Please describe your project in at least 20 characters.';
+  if (logo && !safeUrl(logo)) return 'Logo URL must be a valid http:// or https:// address.';
+  if (link && !safeUrl(link)) return 'Project link must be a valid http:// or https:// address.';
+  return null;
+}
+
+function refreshSubmitState() {
+  document.getElementById('submit-btn').disabled = validate() !== null;
+  errorEl.hidden = true;
+}
+
+async function submitProject(event) {
   event.preventDefault();
-  
-  const submitBtn = document.getElementById('submit-btn');
-  const originalText = submitBtn.innerHTML;
-  
-  submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
-  submitBtn.disabled = true;
-  
-  const validation = validateForm();
-  if (!validation.isValid) {
-    showToast(validation.errors[0], 'error');
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
+  const problem = validate();
+  if (problem) {
+    showError(problem);
     return;
   }
-  
-  const name = document.getElementById('comp-name').value.trim();
-  const logo = document.getElementById('comp-logo').value.trim() || 'https://via.placeholder.com/100/4CAF50/FFFFFF?text=' + name.charAt(0);
-  const link = document.getElementById('comp-link').value.trim() || '#';
-  const idea = document.getElementById('comp-idea').value.trim();
-  
-  try {
-    const companies = JSON.parse(safeGetItem('companies', '[]'));
-    const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":"","email":""}'));
-    const id = getNextId(companies);
-    
-    // FIXED: Associate project with current user
-    const newProject = {
-      id,
-      name: escapeHtml(name),
-      logo: escapeHtml(logo),
-      idea: escapeHtml(idea),
-      link: escapeHtml(link),
-      likes: 0,
-      comments: [],
-      connections: [],
-      timestamp: new Date().toISOString(),
-      // IMPORTANT: Track who submitted this project
-      submittedBy: profile.user,
-      submitterEmail: profile.email,
-      submitterCompany: profile.company
-    };
-    
-    companies.push(newProject);
-    
-    if (safeSetItem('companies', JSON.stringify(companies))) {
-      // FIXED: Update karma breakdown tracking
-      updateKarmaBreakdown('submit', 5);
-      addKarma(5);
-      
-      // Reset form
-      document.getElementById('submit-form').reset();
-      updateCharCount('comp-name', 'name-count', 50);
-      updateCharCount('comp-idea', 'idea-count', 200);
-      
-      setTimeout(() => {
-        submitBtn.innerHTML = originalText;
-        showSuccessModal();
-      }, 1000);
-    } else {
-      throw new Error('Failed to save project');
-    }
-  } catch (error) {
-    console.error('Submission error:', error);
-    showToast('Failed to submit project. Please try again.', 'error');
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-  }
-}
 
-// Success modal functions
-function showSuccessModal() {
-  document.getElementById('success-modal').classList.add('active');
-  document.body.classList.add('modal-open');
+  const button = document.getElementById('submit-btn');
+  setBusy(button, true, 'Submitting...');
+
+  try {
+    await api.createProject(user, {
+      name: document.getElementById('comp-name').value.trim(),
+      idea: document.getElementById('comp-idea').value.trim(),
+      // Normalised through safeUrl so only http(s) ever reaches the database.
+      link: safeUrl(document.getElementById('comp-link').value.trim()) || '',
+      logo: safeUrl(document.getElementById('comp-logo').value.trim()) || ''
+    });
+
+    document.getElementById('submit-form').reset();
+    updateCharCount('comp-name', 'name-count', 50);
+    updateCharCount('comp-idea', 'idea-count', 350);
+    refreshSubmitState();
+    refreshKarma();
+
+    document.getElementById('success-modal').classList.add('active');
+    document.body.classList.add('modal-open');
+  } catch (error) {
+    console.error(error);
+    showError('Could not submit your project. Please check your connection and try again.');
+    showToast('Submission failed', 'error');
+  } finally {
+    setBusy(button, false);
+    refreshSubmitState();
+  }
 }
 
 function closeSuccessModal() {
@@ -388,177 +223,43 @@ function closeSuccessModal() {
   document.body.classList.remove('modal-open');
 }
 
-function submitAnother() {
-  closeSuccessModal();
-  window.scrollTo(0, 0);
-}
+(async function start() {
+  user = await requireAuth();
+  if (!user) return;
 
-function goToFeed() {
-  closeSuccessModal();
-  navigate('index.html');
-}
+  renderVerifyBanner(user);
+  document.getElementById('greeting').textContent = `Welcome, ${user.displayName || 'builder'}!`;
 
-// Event listeners
-window.onload = () => {
-  renderGreeting();
-  updateKarmaDisplay();
-  
-  document.getElementById('submit-form').onsubmit = submitIdea;
-  
+  document.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-nav]');
+    if (target) navigate(target.dataset.nav);
+  });
+  document.querySelectorAll('[data-close="success"]').forEach((el) => (el.onclick = closeSuccessModal));
+  document.getElementById('signout-btn').onclick = logout;
+  document.getElementById('submit-form').onsubmit = submitProject;
+  document.getElementById('submit-another').onclick = () => {
+    closeSuccessModal();
+    window.scrollTo(0, 0);
+  };
+
   document.getElementById('comp-name').addEventListener('input', () => {
     updateCharCount('comp-name', 'name-count', 50);
+    refreshSubmitState();
   });
-  
   document.getElementById('comp-idea').addEventListener('input', () => {
-    updateCharCount('comp-idea', 'idea-count', 200);
+    updateCharCount('comp-idea', 'idea-count', 350);
+    refreshSubmitState();
   });
-  
-  document.getElementById('comp-logo').addEventListener('input', validateForm);
-  document.getElementById('comp-link').addEventListener('input', validateForm);
-  
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeSuccessModal();
-    }
-    if (e.ctrlKey && e.key === 'Enter') {
-      document.getElementById('submit-form').dispatchEvent(new Event('submit'));
-    }
+  document.getElementById('comp-logo').addEventListener('input', refreshSubmitState);
+  document.getElementById('comp-link').addEventListener('input', refreshSubmitState);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeSuccessModal();
   });
-  
-  validateForm();
-};
+
+  refreshSubmitState();
+  refreshKarma();
+})();
 </script>
-
-<style>
-.form-header {
-  text-align: center;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(48, 31, 79, 0.1);
-}
-
-.form-header h3 {
-  color: var(--primary);
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-}
-
-.form-header p {
-  color: var(--text-gray);
-  font-size: 0.9rem;
-}
-
-.char-counter {
-  text-align: right;
-  font-size: 0.8rem;
-  color: var(--text-gray);
-  margin-top: 0.5rem;
-}
-
-.field-hint {
-  font-size: 0.8rem;
-  color: var(--text-gray);
-  margin-top: 0.5rem;
-  font-style: italic;
-}
-
-.submission-benefits {
-  background: linear-gradient(135deg, rgba(247, 201, 75, 0.1), rgba(247, 201, 75, 0.05));
-  padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid rgba(247, 201, 75, 0.3);
-}
-
-.submission-benefits h4 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-
-.submission-benefits ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.submission-benefits li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.submission-benefits li::before {
-  content: '✨';
-  font-size: 1rem;
-}
-
-.form-footer {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(48, 31, 79, 0.1);
-}
-
-.form-footer p {
-  font-size: 0.8rem;
-  color: var(--text-gray);
-  line-height: 1.4;
-}
-
-.success-content {
-  text-align: center;
-  padding: 1rem 0;
-}
-
-.success-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.success-content h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.success-content p {
-  color: var(--text-gray);
-  margin-bottom: 1.5rem;
-  line-height: 1.6;
-}
-
-.karma-earned {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, var(--accent), #f4d467);
-  padding: 1rem;
-  border-radius: 12px;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-
-.karma-earned .karma-icon {
-  font-size: 1.2rem;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-</style>
 </body>
 </html>

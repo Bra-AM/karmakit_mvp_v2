@@ -18,15 +18,15 @@
         </div>
       </div>
       <nav class="main-nav">
-        <button class="nav-btn" onclick="navigate('index.html')">
+        <button class="nav-btn" data-nav="index.html">
           <span class="nav-icon">🏠</span>
           Home
         </button>
-        <button class="nav-btn" onclick="navigate('submit.html')">
+        <button class="nav-btn" data-nav="submit.html">
           <span class="nav-icon">🚀</span>
           Submit Idea
         </button>
-        <button class="nav-btn active" onclick="navigate('profile.html')">
+        <button class="nav-btn active" data-nav="profile.html">
           <span class="nav-icon">👤</span>
           Profile
         </button>
@@ -39,6 +39,7 @@
         <span class="karma-label">Karma</span>
       </div>
       <p id="greeting" class="user-greeting"></p>
+      <button class="link-btn signout-btn" id="signout-btn">Sign out</button>
     </div>
   </header>
 
@@ -48,7 +49,6 @@
       <p class="hero-subtitle">Manage your information and track your KarmaKit journey</p>
     </div>
 
-    <!-- Profile Overview Card -->
     <div class="profile-overview">
       <div class="profile-avatar">
         <div class="avatar-circle" id="avatar-circle">
@@ -59,7 +59,7 @@
         </div>
       </div>
       <div class="profile-summary">
-        <h3 id="profile-name">Guest User</h3>
+        <h3 id="profile-name">Loading...</h3>
         <p id="profile-company">No company set</p>
         <div class="profile-stats">
           <div class="stat-pill">
@@ -76,64 +76,39 @@
       </div>
     </div>
 
-    <!-- Detailed Stats Grid -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">🚀</span>
-          <h4>Projects Submitted</h4>
-        </div>
+        <div class="stat-header"><span class="stat-icon-large">🚀</span><h4>Projects Submitted</h4></div>
         <div class="stat-value" id="projects-submitted">0</div>
         <div class="stat-description">Ideas shared with community</div>
       </div>
-      
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">❤️</span>
-          <h4>Likes Received</h4>
-        </div>
+        <div class="stat-header"><span class="stat-icon-large">❤️</span><h4>Likes Received</h4></div>
         <div class="stat-value" id="likes-received">0</div>
         <div class="stat-description">People who loved your projects</div>
       </div>
-      
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">💬</span>
-          <h4>Feedback Received</h4>
-        </div>
+        <div class="stat-header"><span class="stat-icon-large">💬</span><h4>Feedback Received</h4></div>
         <div class="stat-value" id="comments-received">0</div>
         <div class="stat-description">Valuable insights from builders</div>
       </div>
-      
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">🤝</span>
-          <h4>Connections Made</h4>
-        </div>
+        <div class="stat-header"><span class="stat-icon-large">🤝</span><h4>Connection Requests</h4></div>
         <div class="stat-value" id="connections-made">0</div>
-        <div class="stat-description">Network connections established</div>
+        <div class="stat-description">Builders who want to reach you</div>
       </div>
-      
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">🎯</span>
-          <h4>Feedback Given</h4>
-        </div>
+        <div class="stat-header"><span class="stat-icon-large">🎯</span><h4>Feedback Given</h4></div>
         <div class="stat-value" id="feedback-given">0</div>
         <div class="stat-description">Help provided to other builders</div>
       </div>
-      
       <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-icon-large">🏆</span>
-          <h4>Achievement Level</h4>
-        </div>
-        <div class="stat-value" id="achievement-level">Bronze</div>
+        <div class="stat-header"><span class="stat-icon-large">🏆</span><h4>Achievement Level</h4></div>
+        <div class="stat-value" id="achievement-level">Newbie</div>
         <div class="stat-description">Based on your karma points</div>
       </div>
     </div>
 
-    <!-- Profile Form -->
     <form class="profile-form" id="profile-form">
       <div class="form-header">
         <h3>📝 Edit Profile Information</h3>
@@ -154,13 +129,13 @@
 
       <label>
         Email Address
-        <input type="email" id="user-email" placeholder="your.email@example.com (for connections)">
-        <small class="field-hint">Used for connection requests - kept private unless you choose to share</small>
+        <input type="email" id="user-email" disabled>
+        <small class="field-hint">This is your sign-in email and cannot be changed here.</small>
       </label>
 
       <label>
         Bio/Tagline
-        <textarea id="user-bio" maxlength="150" placeholder="Brief description about yourself and what you're building..." rows="3"></textarea>
+        <textarea id="user-bio" maxlength="150" rows="3" placeholder="Brief description about yourself and what you're building..."></textarea>
         <span class="char-counter"><span id="bio-count">0</span>/150</span>
       </label>
 
@@ -184,33 +159,35 @@
       </button>
     </form>
 
-    <!-- My Projects Section -->
     <div class="my-projects-section">
       <div class="section-header">
         <h3>🚀 My Projects</h3>
-        <button class="btn-secondary" onclick="navigate('submit.html')">
+        <button class="btn-secondary" data-nav="submit.html">
           <span class="btn-icon">➕</span>
           Add New Project
         </button>
       </div>
-      <div id="my-projects-list" class="projects-list">
-        <!-- Projects will be populated here -->
-      </div>
+      <div id="my-projects-list" class="projects-list"></div>
     </div>
 
-    <!-- Karma Breakdown -->
+    <div class="my-projects-section">
+      <div class="section-header">
+        <h3>🤝 Connection Requests</h3>
+      </div>
+      <div id="connections-list" class="projects-list"></div>
+    </div>
+
     <div class="karma-breakdown">
       <h3>⭐ Karma Breakdown</h3>
+      <p class="data-note">
+        Karma is calculated from your actual activity every time this page loads. It is
+        not stored as an editable number.
+      </p>
       <div class="karma-sources">
         <div class="karma-source">
           <span class="source-icon">🚀</span>
           <span class="source-label">Projects Submitted</span>
           <span class="source-value" id="karma-projects">0</span>
-        </div>
-        <div class="karma-source">
-          <span class="source-icon">❤️</span>
-          <span class="source-label">Projects Liked</span>
-          <span class="source-value" id="karma-likes">0</span>
         </div>
         <div class="karma-source">
           <span class="source-icon">💬</span>
@@ -225,24 +202,25 @@
       </div>
     </div>
 
-    <!-- Data Management -->
     <div class="data-management">
       <h3>🗂️ Data Management</h3>
       <div class="data-actions">
-        <button class="btn-secondary" onclick="exportData()">
+        <button class="btn-secondary" id="export-btn">
           <span class="btn-icon">📤</span>
           Export My Data
         </button>
-        <button class="btn-warning" onclick="confirmClearData()">
+        <button class="btn-warning" id="delete-btn">
           <span class="btn-icon">🗑️</span>
-          Clear All Data
+          Delete My Account
         </button>
       </div>
-      <p class="data-note">Export your profile and project data, or reset your account to start fresh.</p>
+      <p class="data-note">
+        Export downloads everything we hold about you as JSON. Deleting removes your
+        account, projects, votes and feedback permanently.
+      </p>
     </div>
   </main>
 
-  <!-- Success Toast -->
   <div class="toast" id="success-toast">
     <div class="toast-content">
       <span class="toast-icon">🎉</span>
@@ -250,408 +228,322 @@
     </div>
   </div>
 
-  <!-- Confirmation Modal -->
   <div class="modal" id="confirm-modal">
-    <div class="modal-overlay" onclick="closeConfirmModal()"></div>
+    <div class="modal-overlay" data-close="confirm"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h2>⚠️ Confirm Action</h2>
-        <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+        <h2>⚠️ Delete your account?</h2>
+        <button class="close-btn" data-close="confirm">&times;</button>
       </div>
       <div class="modal-body">
-        <p id="confirm-message">Are you sure you want to proceed?</p>
+        <p>
+          This permanently deletes your account, every project you submitted, and all
+          feedback and votes you gave. It cannot be undone.
+        </p>
+        <p class="auth-error" id="delete-error" hidden></p>
       </div>
       <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-        <button class="btn-warning" id="confirm-action">Confirm</button>
+        <button class="btn-secondary" data-close="confirm">Cancel</button>
+        <button class="btn-warning" id="confirm-delete">Delete permanently</button>
       </div>
     </div>
   </div>
 
-<script>
-// Enhanced utility functions
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+<script type="module">
+import { requireAuth, logout, getProfile, saveProfile, renderVerifyBanner } from './js/auth.js';
+import * as api from './js/api.js';
+import { db, auth } from './js/firebase-config.js';
+import { esc, initials, colorFor, avatarMarkup, formatDate, navigate, showToast, setBusy, levelFor, rankFor } from './js/ui.js';
+import { collection, query, where, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-function safeSetItem(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    return true;
-  } catch (e) {
-    console.error('Storage error:', e);
-    showToast('Unable to save data. Storage might be full.', 'error');
-    return false;
-  }
-}
+let user = null;
+let profile = null;
 
-function safeGetItem(key, fallback = null) {
-  try {
-    return localStorage.getItem(key) || fallback;
-  } catch (e) {
-    console.error('Storage read error:', e);
-    return fallback;
-  }
-}
-
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('success-toast');
-  const messageEl = toast.querySelector('.toast-message');
-  const iconEl = toast.querySelector('.toast-icon');
-  
-  messageEl.textContent = message;
-  iconEl.textContent = type === 'success' ? '🎉' : type === 'warning' ? '⚠️' : '🎉';
-  toast.classList.add('show');
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
-}
-
-function navigate(page) { 
-  document.body.classList.add('page-loading');
-  setTimeout(() => {
-    window.location = page;
-  }, 300);
-}
-
-function updateKarmaDisplay() {
-  const karma = safeGetItem('karma', '0');
-  document.getElementById('karma-count').textContent = karma;
-}
-
-function renderGreeting() {
-  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
-  document.getElementById('greeting').textContent = `Welcome, ${profile.user}!`;
-}
-
-// Profile calculation functions
-function calculateLevel(karma) {
-  const karmaInt = parseInt(karma, 10);
-  if (karmaInt >= 100) return 'Karma Master';
-  if (karmaInt >= 50) return 'Super Builder';
-  if (karmaInt >= 25) return 'Active Builder';
-  if (karmaInt >= 10) return 'Rising Star';
-  if (karmaInt >= 5) return 'Beginner';
-  return 'Newbie';
-}
-
-function calculateRank(karma) {
-  const karmaInt = parseInt(karma, 10);
-  if (karmaInt >= 100) return '🏆 Elite';
-  if (karmaInt >= 50) return '🥇 Gold';
-  if (karmaInt >= 25) return '🥈 Silver';
-  if (karmaInt >= 10) return '🥉 Bronze';
-  return 'Unranked';
-}
-
-function getInitials(name) {
-  return name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
-}
-
-// Character counting
 function updateCharCount(inputId, countId, maxLength) {
   const input = document.getElementById(inputId);
   const counter = document.getElementById(countId);
-  const length = input.value.length;
-  
-  counter.textContent = length;
-  counter.style.color = length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
+  counter.textContent = input.value.length;
+  counter.style.color = input.value.length > maxLength * 0.9 ? '#f44336' : '#6a5d85';
 }
 
-// FIXED: Enhanced karma tracking initialization
-function initializeKarmaTracking() {
-  if (!safeGetItem('karmaBreakdown')) {
-    const breakdown = {
-      projectsSubmitted: 0,
-      projectsLiked: 0, 
-      feedbackGiven: 0,
-      projectsReviewed: 0
-    };
-    safeSetItem('karmaBreakdown', JSON.stringify(breakdown));
-  }
-}
-
-// FIXED: Enhanced project tracking with user association
-function getUserProjects() {
-  const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":""}'));
-  const companies = JSON.parse(safeGetItem('companies', '[]'));
-  
-  // Find projects submitted by current user using multiple criteria
-  return companies.filter(project => 
-    project.submittedBy === profile.user || 
-    project.submitterEmail === profile.email ||
-    (project.name && profile.company && project.name === profile.company)
-  );
-}
-
-// FIXED: Main render function with proper karma breakdown
-function renderProfile() {
-  try {
-    initializeKarmaTracking();
-    
-    const profile = JSON.parse(safeGetItem('profile', '{"user":"Guest","company":"","email":"","bio":""}'));
-    const companies = JSON.parse(safeGetItem('companies', '[]'));
-    const karma = parseInt(safeGetItem('karma', '0'), 10);
-    const totalFeedback = parseInt(safeGetItem('totalFeedbackGiven', '0'), 10);
-    const karmaBreakdown = JSON.parse(safeGetItem('karmaBreakdown', '{"projectsSubmitted":0,"projectsLiked":0,"feedbackGiven":0,"projectsReviewed":0}'));
-    
-    // Update form fields
-    document.getElementById('user-name').value = profile.user || '';
-    document.getElementById('company-name').value = profile.company || '';
-    document.getElementById('user-email').value = profile.email || '';
-    document.getElementById('user-bio').value = profile.bio || '';
-    document.getElementById('allow-connections').checked = profile.allowConnections || false;
-    document.getElementById('show-email').checked = profile.showEmail || false;
-    
-    // Update character counters
-    updateCharCount('user-name', 'name-count', 50);
-    updateCharCount('company-name', 'company-count', 100);
-    updateCharCount('user-bio', 'bio-count', 150);
-    
-    // Update profile overview
-    document.getElementById('profile-name').textContent = profile.user || 'Guest User';
-    document.getElementById('profile-company').textContent = profile.company || 'No company set';
-    document.getElementById('avatar-initials').textContent = getInitials(profile.user || 'Guest User');
-    document.getElementById('level-badge').textContent = calculateLevel(karma);
-    document.getElementById('total-karma').textContent = karma;
-    document.getElementById('profile-rank').textContent = calculateRank(karma);
-    
-    // FIXED: Get user's projects using enhanced matching
-    const userProjects = getUserProjects();
-    let totalLikes = 0;
-    let totalComments = 0;
-    let totalConnections = 0;
-    
-    userProjects.forEach(project => {
-      totalLikes += project.likes || 0;
-      totalComments += project.comments ? project.comments.length : 0;
-      totalConnections += project.connections ? project.connections.length : 0;
-    });
-    
-    // Update detailed stats
-    document.getElementById('projects-submitted').textContent = userProjects.length;
-    document.getElementById('likes-received').textContent = totalLikes;
-    document.getElementById('comments-received').textContent = totalComments;
-    document.getElementById('connections-made').textContent = totalConnections;
-    document.getElementById('feedback-given').textContent = totalFeedback;
-    document.getElementById('achievement-level').textContent = calculateLevel(karma);
-    
-    // FIXED: Update karma breakdown with actual tracked values
-    document.getElementById('karma-projects').textContent = karmaBreakdown.projectsSubmitted;
-    document.getElementById('karma-likes').textContent = karmaBreakdown.projectsLiked;
-    document.getElementById('karma-feedback').textContent = karmaBreakdown.feedbackGiven;
-    document.getElementById('karma-reviews').textContent = karmaBreakdown.projectsReviewed;
-    
-    // Render user projects
-    renderMyProjects(userProjects);
-    
-  } catch (error) {
-    console.error('Profile rendering error:', error);
-    showToast('Error loading profile data', 'error');
-    
-    // Reset to defaults
-    document.getElementById('total-karma').textContent = '0';
-    document.getElementById('projects-submitted').textContent = '0';
-    document.getElementById('likes-received').textContent = '0';
-    document.getElementById('comments-received').textContent = '0';
-  }
-}
-
-// FIXED: Enhanced renderMyProjects to show actual user projects with timestamps
-function renderMyProjects(projects) {
+async function renderProjects() {
   const container = document.getElementById('my-projects-list');
-  
-  if (projects.length === 0) {
+  const projects = await api.getMyProjects(user.uid);
+
+  if (!projects.length) {
     container.innerHTML = `
       <div class="empty-projects">
         <div class="empty-icon">📱</div>
         <h4>No projects yet!</h4>
         <p>Submit your first project to start building your profile.</p>
-        <button class="btn-primary" onclick="navigate('submit.html')">Submit Project</button>
-      </div>
-    `;
-    return;
+        <button class="btn-primary" data-nav="submit.html">Submit Project</button>
+      </div>`;
+    return 0;
   }
-  
-  container.innerHTML = projects.map(project => `
+
+  const [withCounts, feedbackByProject] = await Promise.all([
+    Promise.all(
+      projects.map(async (project) => ({ ...project, counts: await api.getProjectCounts(project.id) }))
+    ),
+    api.getFeedbackForOwner(user.uid)
+  ]);
+
+  container.innerHTML = withCounts
+    .map((project) => {
+      const feedback = feedbackByProject[project.id] || [];
+      return `
     <div class="project-card">
       <div class="project-header">
-        <img src="${project.logo}" alt="${escapeHtml(project.name)}" onerror="this.src='https://via.placeholder.com/60'">
+        ${avatarMarkup(project.name, project.logo, 'project-avatar')}
         <div class="project-info">
-          <h4>${escapeHtml(project.name)}</h4>
-          <p>${escapeHtml(project.idea)}</p>
-          <small class="project-date">Submitted: ${project.timestamp ? new Date(project.timestamp).toLocaleDateString() : 'Recently'}</small>
+          <h4>${esc(project.name)}</h4>
+          <p>${esc(project.idea)}</p>
+          <small class="project-date">Submitted: ${esc(formatDate(project.createdAt))}</small>
         </div>
       </div>
       <div class="project-stats">
-        <span class="project-stat">❤️ ${project.likes || 0}</span>
-        <span class="project-stat">💬 ${project.comments ? project.comments.length : 0}</span>
-        <span class="project-stat">🤝 ${project.connections ? project.connections.length : 0}</span>
+        <span class="project-stat">❤️ ${project.counts.likes}</span>
+        <span class="project-stat">💬 ${project.counts.comments}</span>
+        <span class="project-stat">🤝 ${project.counts.connections}</span>
       </div>
-    </div>
-  `).join('');
+      ${
+        feedback.length
+          ? `<details class="feedback-block">
+               <summary>Read ${feedback.length} piece${feedback.length === 1 ? '' : 's'} of feedback</summary>
+               ${feedback
+                 .map(
+                   (comment) => `
+                 <div class="feedback-item">
+                   <p>${esc(comment.text)}</p>
+                   <small>${esc(comment.authorName)} &middot; ${esc(formatDate(comment.createdAt))}${
+                     comment.wantsConnection ? ' &middot; 🤝 wants to connect' : ''
+                   }</small>
+                 </div>`
+                 )
+                 .join('')}
+             </details>`
+          : '<p class="feedback-empty">No feedback on this project yet.</p>'
+      }
+    </div>`;
+    })
+    .join('');
+
+  return projects.length;
 }
 
-// Form submission
-function saveProfile(event) {
+async function renderConnections() {
+  const container = document.getElementById('connections-list');
+  const requests = await api.getMyConnectionRequests(user.uid);
+
+  if (!requests.length) {
+    container.innerHTML = `
+      <div class="empty-projects">
+        <div class="empty-icon">🤝</div>
+        <h4>No connection requests yet</h4>
+        <p>When a builder asks to connect on one of your projects, their contact details appear here.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = requests
+    .map(
+      (request) => `
+    <div class="project-card connection-card">
+      <div class="project-info">
+        <h4>${esc(request.fromName)}</h4>
+        <p><a href="mailto:${esc(request.fromEmail)}">${esc(request.fromEmail)}</a></p>
+        ${request.message ? `<p class="connection-message">${esc(request.message)}</p>` : ''}
+        <small class="project-date">${esc(formatDate(request.createdAt))}</small>
+      </div>
+    </div>`
+    )
+    .join('');
+}
+
+async function render() {
+  profile = (await getProfile(user.uid)) || {};
+  const displayName = profile.displayName || user.displayName || 'Builder';
+
+  document.getElementById('greeting').textContent = `Welcome, ${displayName}!`;
+  document.getElementById('profile-name').textContent = displayName;
+  document.getElementById('profile-company').textContent = profile.company || 'No company set';
+  document.getElementById('avatar-initials').textContent = initials(displayName);
+  document.getElementById('avatar-circle').style.background = colorFor(displayName);
+
+  document.getElementById('user-name').value = displayName;
+  document.getElementById('company-name').value = profile.company || '';
+  document.getElementById('user-email').value = user.email || '';
+  document.getElementById('user-bio').value = profile.bio || '';
+  document.getElementById('allow-connections').checked = profile.allowConnections !== false;
+  document.getElementById('show-email').checked = Boolean(profile.showEmail);
+  updateCharCount('user-name', 'name-count', 50);
+  updateCharCount('company-name', 'company-count', 100);
+  updateCharCount('user-bio', 'bio-count', 150);
+
+  const [karma, received] = await Promise.all([
+    api.getKarma(user.uid),
+    api.getReceivedStats(user.uid)
+  ]);
+
+  document.getElementById('karma-count').textContent = karma.total;
+  document.getElementById('total-karma').textContent = karma.total;
+  document.getElementById('level-badge').textContent = levelFor(karma.total);
+  document.getElementById('achievement-level').textContent = levelFor(karma.total);
+  document.getElementById('profile-rank').textContent = rankFor(karma.total);
+
+  document.getElementById('projects-submitted').textContent = karma.counts.projects;
+  document.getElementById('feedback-given').textContent = karma.counts.comments;
+  document.getElementById('likes-received').textContent = received.likesReceived;
+  document.getElementById('comments-received').textContent = received.feedbackReceived;
+  document.getElementById('connections-made').textContent = received.connectionsMade;
+
+  document.getElementById('karma-projects').textContent = karma.breakdown.projectsSubmitted;
+  document.getElementById('karma-feedback').textContent = karma.breakdown.feedbackGiven;
+  document.getElementById('karma-reviews').textContent = karma.breakdown.projectsReviewed;
+
+  await Promise.all([renderProjects(), renderConnections()]);
+}
+
+async function handleSave(event) {
   event.preventDefault();
-  
-  const saveBtn = document.getElementById('save-btn');
-  const originalText = saveBtn.innerHTML;
-  
-  saveBtn.innerHTML = '<span class="spinner"></span>Saving...';
-  saveBtn.disabled = true;
-  
+  const button = document.getElementById('save-btn');
+  const name = document.getElementById('user-name').value.trim();
+  if (!name) {
+    showToast('Name is required', 'error');
+    return;
+  }
+
+  setBusy(button, true, 'Saving...');
   try {
-    const user = document.getElementById('user-name').value.trim();
-    const company = document.getElementById('company-name').value.trim();
-    const email = document.getElementById('user-email').value.trim();
-    const bio = document.getElementById('user-bio').value.trim();
-    const allowConnections = document.getElementById('allow-connections').checked;
-    const showEmail = document.getElementById('show-email').checked;
-    
-    if (!user) {
-      throw new Error('Name is required');
-    }
-    
-    const profile = {
-      user: escapeHtml(user),
-      company: escapeHtml(company),
-      email: escapeHtml(email),
-      bio: escapeHtml(bio),
-      allowConnections,
-      showEmail,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    if (safeSetItem('profile', JSON.stringify(profile))) {
-      setTimeout(() => {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
-        showToast('Profile saved successfully!');
-        renderProfile();
-      }, 1000);
-    } else {
-      throw new Error('Failed to save profile');
-    }
+    await saveProfile(user.uid, {
+      displayName: name,
+      company: document.getElementById('company-name').value.trim(),
+      bio: document.getElementById('user-bio').value.trim(),
+      allowConnections: document.getElementById('allow-connections').checked,
+      showEmail: document.getElementById('show-email').checked
+    });
+    showToast('Profile saved successfully!');
+    await render();
   } catch (error) {
-    console.error('Save error:', error);
-    showToast(error.message, 'error');
-    saveBtn.innerHTML = originalText;
-    saveBtn.disabled = false;
+    console.error(error);
+    showToast('Could not save your profile. Please try again.', 'error');
+  } finally {
+    setBusy(button, false);
   }
 }
 
-// Data management functions
-function exportData() {
+async function handleExport() {
+  const [karma, received, projects, connections] = await Promise.all([
+    api.getKarma(user.uid),
+    api.getReceivedStats(user.uid),
+    api.getMyProjects(user.uid),
+    api.getMyConnectionRequests(user.uid)
+  ]);
+
+  const payload = {
+    account: { uid: user.uid, email: user.email, displayName: user.displayName },
+    profile,
+    karma,
+    received,
+    projects,
+    connectionRequests: connections,
+    exportedAt: new Date().toISOString()
+  };
+
+  const url = URL.createObjectURL(
+    new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  );
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'karmakit-data-export.json';
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported successfully!');
+}
+
+/**
+ * Cascade delete. Firestore has no ON DELETE CASCADE, and doing this from a
+ * Cloud Function would push the project onto a paid plan, so the client removes
+ * its own documents first. Security rules only permit deleting your own.
+ */
+async function deleteOwnDocuments() {
+  const owned = [
+    query(collection(db, 'projects'), where('ownerId', '==', user.uid)),
+    query(collection(db, 'votes'), where('userId', '==', user.uid)),
+    query(collection(db, 'comments'), where('userId', '==', user.uid)),
+    query(collection(db, 'connections'), where('fromUserId', '==', user.uid))
+  ];
+
+  for (const q of owned) {
+    const snapshot = await getDocs(q);
+    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
+  }
+  await deleteDoc(doc(db, 'users', user.uid));
+}
+
+async function handleDelete() {
+  const button = document.getElementById('confirm-delete');
+  const errorEl = document.getElementById('delete-error');
+  errorEl.hidden = true;
+  setBusy(button, true, 'Deleting...');
+
   try {
-    const data = {
-      profile: JSON.parse(safeGetItem('profile', '{}')),
-      companies: JSON.parse(safeGetItem('companies', '[]')),
-      karma: safeGetItem('karma', '0'),
-      karmaBreakdown: JSON.parse(safeGetItem('karmaBreakdown', '{}')),
-      totalFeedbackGiven: safeGetItem('totalFeedbackGiven', '0'),
-      exportDate: new Date().toISOString()
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'karmakit-data-export.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    
-    showToast('Data exported successfully!');
+    await deleteOwnDocuments();
+    await deleteUser(auth.currentUser);
+    window.location = 'login.html';
   } catch (error) {
-    console.error('Export error:', error);
-    showToast('Failed to export data', 'error');
+    console.error(error);
+    // Firebase refuses account deletion on a stale session.
+    errorEl.textContent =
+      error.code === 'auth/requires-recent-login'
+        ? 'For security, please sign out and sign back in, then try deleting again.'
+        : 'Could not delete your account. Please try again.';
+    errorEl.hidden = false;
+    setBusy(button, false);
   }
 }
 
-function confirmClearData() {
-  document.getElementById('confirm-message').textContent = 
-    'This will permanently delete all your profile data, projects, and karma points. This action cannot be undone.';
-  document.getElementById('confirm-modal').classList.add('active');
-  document.getElementById('confirm-action').onclick = clearAllData;
-}
-
-function clearAllData() {
-  try {
-    localStorage.clear();
-    showToast('All data cleared successfully!');
-    closeConfirmModal();
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
-  } catch (error) {
-    console.error('Clear data error:', error);
-    showToast('Failed to clear data', 'error');
-  }
-}
-
-function closeConfirmModal() {
+function closeConfirm() {
   document.getElementById('confirm-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
 }
 
-// Event listeners
-window.onload = () => {
-  updateKarmaDisplay();
-  renderGreeting();
-  renderProfile();
-  
-  document.getElementById('profile-form').onsubmit = saveProfile;
-  
-  document.getElementById('user-name').addEventListener('input', () => {
-    updateCharCount('user-name', 'name-count', 50);
+(async function start() {
+  user = await requireAuth();
+  if (!user) return;
+
+  renderVerifyBanner(user);
+
+  document.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-nav]');
+    if (target) navigate(target.dataset.nav);
   });
-  
-  document.getElementById('company-name').addEventListener('input', () => {
-    updateCharCount('company-name', 'company-count', 100);
+  document.querySelectorAll('[data-close="confirm"]').forEach((el) => (el.onclick = closeConfirm));
+  document.getElementById('signout-btn').onclick = logout;
+  document.getElementById('profile-form').onsubmit = handleSave;
+  document.getElementById('export-btn').onclick = handleExport;
+  document.getElementById('delete-btn').onclick = () => {
+    document.getElementById('confirm-modal').classList.add('active');
+    document.body.classList.add('modal-open');
+  };
+  document.getElementById('confirm-delete').onclick = handleDelete;
+
+  document.getElementById('user-name').addEventListener('input', () => updateCharCount('user-name', 'name-count', 50));
+  document.getElementById('company-name').addEventListener('input', () => updateCharCount('company-name', 'company-count', 100));
+  document.getElementById('user-bio').addEventListener('input', () => updateCharCount('user-bio', 'bio-count', 150));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeConfirm();
   });
-  
-  document.getElementById('user-bio').addEventListener('input', () => {
-    updateCharCount('user-bio', 'bio-count', 150);
-  });
-  
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeConfirmModal();
-    }
-    if (e.ctrlKey && e.key === 's') {
-      e.preventDefault();
-      document.getElementById('profile-form').dispatchEvent(new Event('submit'));
-    }
-  });
-};
+
+  try {
+    await render();
+  } catch (error) {
+    console.error(error);
+    showToast('Could not load your profile data.', 'error');
+  }
+})();
 </script>
-
-<style>
-.project-date {
-  color: var(--text-gray);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  display: block;
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-</style>
 </body>
 </html>

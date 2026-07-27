@@ -4,7 +4,9 @@
 
 KarmaKit is a pop-up feedback exchange platform built for hackathons, demo days, and startup communities. Builders get feedback. Reviewers earn Karma Points.
 
-https://bra-am.github.io/karmakit_mvp_v2/
+**Live at https://karmakitapp.com**
+
+Deploying it yourself? See **[SETUP.md](SETUP.md)**.
 
 ## 🎯 Problem Statement
 
@@ -40,56 +42,43 @@ KarmaKit is a web/mobile pop-up where hackathon participants and founders can in
 
 ## 🛠 Tech Stack
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
+- **Frontend**: HTML5, CSS3, vanilla JavaScript (ES modules) — no build step
 - **Fonts**: Google Fonts (Poppins)
-- **Storage**: localStorage (client-side)
-- **Deployment**: Static hosting (GitHub Pages, Netlify, Vercel)
+- **Auth**: Firebase Authentication (email + password, and Google sign-in)
+- **Database**: Cloud Firestore, with access controlled by `firestore.rules`
+- **Hosting**: Firebase Hosting
 
 ## 🚀 Quick Start
 
-### Option 1: GitHub Pages Deployment
+### Deploying your own instance
 
-1. **Fork this repository** or **create a new repo**
-
-2. **Upload these files** to your repository:
-   ```
-   📁 your-repo/
-   ├── index.html
-   ├── submit.html
-   ├── profile.html
-   ├── style.css
-   ├── karmakit-logo.png
-   └── README.md
-   ```
-
-3. **Enable GitHub Pages**:
-   - Go to your repo **Settings**
-   - Scroll to **Pages** section
-   - Set source to **Deploy from a branch**
-   - Select **main** branch and **/ (root)** folder
-   - Click **Save**
-
-4. **Visit your live site** at: `https://yourusername.github.io/your-repo-name`
-
-### Option 2: Local Development
+Full walkthrough in **[SETUP.md](SETUP.md)**. The short version:
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/karmakit_mvp_v2.git
-cd karmakit_mvp_v2
+npm install -g firebase-tools
+firebase login
 
-# Open in your browser
-open index.html
-# or use a local server
-python -m http.server 8000
-# then visit http://localhost:8000
+# 1. Create a Firebase project, enable Email/Password + Google auth,
+#    and create a Firestore database in production mode.
+# 2. Paste your web config into js/firebase-config.js
+# 3. Then:
+firebase deploy
 ```
 
-### Option 3: One-Click Deploy
+### Local development
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/yourusername/karmakit)
+The app uses ES modules, so it must be served over HTTP — opening `index.html`
+directly from the filesystem will fail on CORS.
 
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/karmakit)
+```bash
+git clone https://github.com/Bra-AM/karmakit_mvp_v2.git
+cd karmakit_mvp_v2
+python -m http.server 8000
+# then visit http://localhost:8000/login.html
+```
+
+Add `localhost` under **Firebase Console → Authentication → Settings →
+Authorized domains** so sign-in works locally.
 
 ## 📱 Usage
 
@@ -141,13 +130,40 @@ python -m http.server 8000
 
 ```
 karmakit/
-├── index.html          # Main app with project feed
-├── submit.html         # Project submission form
-├── profile.html        # User profile and stats
-├── style.css           # Complete styling and responsive design
-├── karmakit-logo.png   # App logo (add your own)
-└── README.md           # This file
+├── login.html              # Landing page + sign in / register
+├── index.html              # Project feed (requires sign-in)
+├── submit.html             # Project submission form
+├── profile.html            # Profile, karma breakdown, connection requests
+├── privacy.html            # Privacy policy (required for Google sign-in)
+├── terms.html              # Terms of service
+├── js/
+│   ├── firebase-config.js  # Your Firebase project config — edit this
+│   ├── auth.js             # Sign in, register, session guard
+│   ├── api.js              # All Firestore reads and writes
+│   └── ui.js               # Escaping, avatars, toasts, shared helpers
+├── firestore.rules         # Security rules — the real access control
+├── firestore.indexes.json  # Composite indexes the queries need
+├── firebase.json           # Hosting + Firestore deploy config
+├── style.css               # Complete styling and responsive design
+├── karmakit-logo.png       # App logo
+├── SETUP.md                # Deployment walkthrough
+└── readme.md               # This file
 ```
+
+### How karma is calculated
+
+Karma is **never stored**. It's counted from the vote, comment and project
+documents every time a page loads:
+
+```
+karma = 5 × (projects submitted)
+      + 2 × (projects reviewed)
+      + 3 × (feedback given)
+```
+
+Because the source documents are protected by `firestore.rules` — one vote per
+person per project, no reviewing your own work, a 10-character minimum on
+feedback — there is no number a user can edit to inflate their score.
 
 ## 🎨 Customization
 
@@ -198,17 +214,18 @@ karmakit/
 
 ## 🔮 Future Roadmap
 
-### Phase 1 (Current)
+### Phase 1
 - ✅ Core feedback and karma system
 - ✅ Mobile-responsive design
-- ✅ Local data storage
 - ✅ Balanced karma rewards
 
-### Phase 2 (Next)
-- 🔄 Real backend with database
-- 🔄 User authentication  
+### Phase 2 (Current)
+- ✅ Real backend with database (Cloud Firestore)
+- ✅ User authentication (email + password, Google sign-in)
+- ✅ Server-enforced karma that can't be gamed
 - 🔄 Real-time notifications
-- 🔄 Advanced analytics dashboard
+- 🔄 Organizer analytics dashboard
+- 🔄 Moderation tools
 
 ### Phase 3 (Future)
 - 🔄 Slack/Discord bot integration
@@ -218,11 +235,16 @@ karmakit/
 
 ## 🛡 Privacy & Security
 
-- **Client-side storage** - All data stored locally in browser
-- **No server dependencies** - Works completely offline
-- **Privacy controls** - Users control data sharing preferences
-- **Data export** - Full data portability
-- **GDPR compliant** - Easy data deletion
+- **Server-enforced rules** - `firestore.rules` decides who can read and write what;
+  the browser code can't be used to talk it out of that
+- **Emails stay private** - shared only when you send someone a connection request
+- **Privacy controls** - users control connection and visibility preferences
+- **Data export** - one-click JSON export of everything held about you
+- **Account deletion** - removes your profile, projects, votes and feedback
+
+Known tradeoffs (votes are visible to signed-in users, email verification isn't
+enforced, no moderation tooling yet) are documented honestly in
+[SETUP.md](SETUP.md#known-tradeoffs).
 
 ## 🤝 Contributing
 
@@ -252,20 +274,18 @@ Created at **SpurHacks 2025** with love for the builder community.
 
 ## 🚀 Ready to Launch?
 
-1. **Download all files** from this repository
-2. **Add your logo** as `karmakit-logo.png` (48x48px recommended)
-3. **Deploy to GitHub Pages** following the instructions above
-4. **Share with your community** and watch the feedback flow!
+Follow **[SETUP.md](SETUP.md)** — Firebase project, security rules, custom domain,
+Google consent screen, and a test checklist that catches the things that actually
+break on launch day.
 
-**Demo URL**: `https://yourusername.github.io/karmakit`
+**Live URL**: https://karmakitapp.com
 
 ---
 
 ### 💬 Questions or Issues?
 
 - Open an issue on GitHub
-- Contact us at [your-email@example.com]
-- Join our community Discord [link]
+- Contact us at hello@karmakitapp.com
 
 **Let's build the future of feedback together!** 🚀✨
 
