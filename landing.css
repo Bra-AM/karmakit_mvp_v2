@@ -3,14 +3,15 @@
    Loaded only by login.html, after style.css.
    ========================================================================== */
 
+/* Deliberately plain block flow. Any centring scheme on the body — flex,
+   grid, auto margins — can interact with overflow in ways that make content
+   taller than the viewport unreachable. A landing page sitting at the top of
+   the page is normal; a page that will not scroll is not. */
 .auth-page {
   min-height: 100vh;
-  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 3rem);
-  display: flex;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 3rem) 4rem;
   position: relative;
   background: #f6f3fc;
-  /* No overflow:hidden here — this element is the body, and hiding overflow
-     stops the page scrolling. The aurora is clipped by its own container. */
 }
 
 /* Soft colour wash behind everything. Pointer-events off so it never
@@ -66,10 +67,7 @@
   max-width: 1140px;
   width: 100%;
   align-items: center;
-  /* Centres via auto margins rather than align-items on the parent. With
-     flex centring, content taller than the viewport overflows past the top
-     edge and becomes unreachable; auto margins stay scrollable. */
-  margin: auto;
+  margin: 0 auto; /* horizontal only — never vertical, see .auth-page */
 }
 
 /* --------------------------------------------------------------- pitch -- */
