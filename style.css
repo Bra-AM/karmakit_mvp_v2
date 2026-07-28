@@ -1772,3 +1772,159 @@ button .spinner,
 }
 
 .card-secondary-link:hover { color: var(--primary); text-decoration: underline; }
+
+/* ==========================================================================
+   Line icons, community counter and the activity list.
+   ========================================================================== */
+
+/* Nav icons are SVG rather than emoji now: they inherit colour from the button,
+   so they invert correctly on the active pill instead of staying full-colour. */
+svg.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.section-icon {
+  width: 19px;
+  height: 19px;
+  vertical-align: -3px;
+  margin-right: 0.4rem;
+  color: var(--primary);
+}
+
+.empty-svg {
+  width: 56px;
+  height: 56px;
+  color: var(--success);
+  margin-bottom: 1rem;
+}
+
+/* Unread count on the Profile nav button. */
+.nav-btn { position: relative; }
+
+.nav-badge {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--error);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--text-light);
+}
+
+/* Community counter */
+.community-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 0.6rem 1.15rem;
+  background: var(--text-light);
+  border: 1px solid rgba(48, 31, 79, 0.1);
+  border-radius: 999px;
+  box-shadow: var(--shadow-light);
+  font-size: 0.9rem;
+  color: var(--text-gray);
+}
+
+.community-line strong { color: var(--primary); font-weight: 700; }
+
+.community-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.22);
+}
+
+/* Activity list */
+.activity-panel {
+  width: 100%;
+  max-width: 800px;
+  background: var(--text-light);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(48, 31, 79, 0.1);
+  margin-bottom: 2rem;
+}
+
+.activity-count {
+  background: var(--error);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.activity-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.activity-item {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: rgba(48, 31, 79, 0.02);
+  border: 1px solid rgba(48, 31, 79, 0.08);
+}
+
+/* Unread items get the accent edge, so new activity is scannable at a glance. */
+.activity-item.is-new {
+  background: rgba(247, 201, 75, 0.09);
+  border-color: rgba(247, 201, 75, 0.45);
+}
+
+.activity-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-body { min-width: 0; flex: 1; }
+
+.activity-headline {
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  margin: 0 0 0.2rem;
+}
+
+.activity-headline strong { color: var(--primary); }
+
+.new-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--error);
+  margin-left: 0.35rem;
+  vertical-align: 1px;
+}
+
+.activity-text {
+  font-size: 0.86rem;
+  color: var(--text-gray);
+  line-height: 1.5;
+  margin: 0.3rem 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid rgba(48, 31, 79, 0.14);
+}
+
+.activity-contact { font-size: 0.82rem; margin: 0.25rem 0; }
+.activity-contact a { color: var(--primary); font-weight: 600; }
+.activity-time { font-size: 0.74rem; color: var(--text-gray); }

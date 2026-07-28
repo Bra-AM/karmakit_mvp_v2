@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KarmaKit - Help Builders Get Users & Feedback</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <header class="enhanced-header">
@@ -19,15 +19,15 @@
       </div>
       <nav class="main-nav">
         <button class="nav-btn active" data-nav="index.html">
-          <span class="nav-icon">🏠</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
           Home
         </button>
         <button class="nav-btn" data-nav="submit.html">
-          <span class="nav-icon">🚀</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 18h5"/><path d="M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8.9.9 1.5l.1.6h5l.1-.6c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z"/></svg>
           Submit Idea
         </button>
         <button class="nav-btn" data-nav="profile.html">
-          <span class="nav-icon">👤</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.8 20a7.5 7.5 0 0 1 14.4 0"/></svg>
           Profile
         </button>
       </nav>
@@ -77,20 +77,14 @@
       </button>
     </div>
 
-    <div class="stats-bar">
-      <div class="stat-item">
-        <span class="stat-number" id="total-projects">0</span>
-        <span class="stat-label">Projects</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number" id="total-feedback">0</span>
-        <span class="stat-label">Feedback Given</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-number" id="active-builders">0</span>
-        <span class="stat-label">Active Builders</span>
-      </div>
-    </div>
+    <!-- The only community-wide figure. Project and feedback counts are personal
+         and live on the profile, where they can't be mistaken for someone
+         else's numbers. -->
+    <p class="community-line">
+      <span class="community-dot"></span>
+      <strong id="active-builders">0</strong>
+      <span id="community-label">builders building together</span>
+    </p>
   </main>
 
   <!-- Feedback Modal -->
@@ -157,9 +151,9 @@
   </div>
 
 <script type="module">
-import { requireAuth, logout, renderVerifyBanner } from './js/auth.js';
+import { requireAuth, logout, getProfile, renderVerifyBanner } from './js/auth.js';
 import * as api from './js/api.js';
-import { esc, safeUrl, avatarMarkup, navigate, showToast, setBusy } from './js/ui.js';
+import { esc, safeUrl, avatarMarkup, navigate, showToast, setBusy, renderActivityBadge } from './js/ui.js';
 
 let user = null;
 let feed = [];
@@ -177,17 +171,29 @@ async function refreshKarma() {
   setTimeout(() => document.querySelector('.karma-display').classList.remove('karma-gained'), 600);
 }
 
-async function refreshGlobalStats() {
-  const stats = await api.getGlobalStats();
-  document.getElementById('total-projects').textContent = stats.projects;
-  document.getElementById('total-feedback').textContent = stats.feedback;
-  document.getElementById('active-builders').textContent = stats.builders;
+async function refreshCommunity() {
+  const builders = await api.countBuilders();
+  document.getElementById('active-builders').textContent = builders;
+  document.getElementById('community-label').textContent =
+    builders === 1 ? 'builder here — invite someone!' : 'builders building together';
+}
+
+/** Unread feedback and connection requests, shown on the Profile nav button. */
+async function refreshBadge() {
+  try {
+    const profile = await getProfile(user.uid);
+    renderActivityBadge(await api.countUnread(user.uid, profile?.lastSeenActivityAt || null));
+  } catch (error) {
+    console.error('Could not load activity count', error);
+  }
 }
 
 function showEmptyState() {
   document.getElementById('card-container').innerHTML = `
     <div class="empty-state">
-      <div class="empty-icon">🎉</div>
+      <svg class="empty-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/><path d="m8.3 12.4 2.6 2.6 4.8-5.4"/>
+      </svg>
       <h3>You're all caught up!</h3>
       <p>You have reviewed every project available right now. Check back soon, or add one of your own.</p>
       <button class="btn-primary" data-nav="submit.html">Submit a Project</button>
@@ -441,7 +447,8 @@ async function submitConnection() {
   }
 
   refreshKarma();
-  refreshGlobalStats();
+  refreshCommunity();
+  refreshBadge();
 })();
 </script>
 </body>

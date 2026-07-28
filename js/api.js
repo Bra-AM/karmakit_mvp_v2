@@ -253,13 +253,112 @@ export async function getReceivedStats(uid) {
   return { likesReceived, feedbackReceived, connectionsMade };
 }
 
+/* ----------------------------------------------------------- activity feed */
+
+const ACTIVITY_LIMIT = 30;
+
+/**
+ * Feedback and connection requests you have received, newest first.
+ *
+ * There is no notifications collection and no Cloud Function writing to one.
+ * Activity is derived on read from the comment and connection documents that
+ * already exist, and "unread" is simply anything newer than the timestamp we
+ * store when you last opened the page. Nothing to keep in sync, nothing to
+ * backfill, and it cannot drift out of step with reality.
+ */
+export async function getActivity(uid, since = null) {
+  const [commentSnap, connectionSnap] = await Promise.all([
+    getDocs(
+      query(
+        collection(db, 'comments'),
+        where('projectOwnerId', '==', uid),
+        orderBy('createdAt', 'desc'),
+        limit(ACTIVITY_LIMIT)
+      )
+    ),
+    getDocs(
+      query(
+        collection(db, 'connections'),
+        where('toUserId', '==', uid),
+        orderBy('createdAt', 'desc'),
+        limit(ACTIVITY_LIMIT)
+      )
+    )
+  ]);
+
+  const sinceMs = since ? toMillis(since) : 0;
+
+  const items = [
+    ...commentSnap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        type: 'feedback',
+        who: data.authorName || 'Someone',
+        text: data.text,
+        wantsConnection: Boolean(data.wantsConnection),
+        projectId: data.projectId,
+        createdAt: data.createdAt
+      };
+    }),
+    ...connectionSnap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        type: 'connection',
+        who: data.fromName || 'Someone',
+        email: data.fromEmail,
+        text: data.message,
+        projectId: data.projectId,
+        createdAt: data.createdAt
+      };
+    })
+  ];
+
+  items.forEach((item) => {
+    item.isNew = toMillis(item.createdAt) > sinceMs;
+  });
+
+  items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+  return items.slice(0, ACTIVITY_LIMIT);
+}
+
+/** Firestore timestamps arrive as Timestamp, or null while a write is pending. */
+function toMillis(value) {
+  if (!value) return 0;
+  if (typeof value.toMillis === 'function') return value.toMillis();
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
+/**
+ * How many pieces of activity arrived since `since`. Used for the header badge,
+ * so it is two count queries rather than fetching the documents themselves.
+ */
+export async function countUnread(uid, since) {
+  if (!since) {
+    // Never opened the activity list: treat everything received as unread.
+    const [feedback, connections] = await Promise.all([
+      countOf('comments', where('projectOwnerId', '==', uid)),
+      countOf('connections', where('toUserId', '==', uid))
+    ]);
+    return feedback + connections;
+  }
+
+  const [feedback, connections] = await Promise.all([
+    countOf('comments', where('projectOwnerId', '==', uid), where('createdAt', '>', since)),
+    countOf('connections', where('toUserId', '==', uid), where('createdAt', '>', since))
+  ]);
+  return feedback + connections;
+}
+
 /* ------------------------------------------------------------ global stats */
 
-export async function getGlobalStats() {
-  const [projects, feedback, builders] = await Promise.all([
-    countOf('projects'),
-    countOf('comments'),
-    countOf('users')
-  ]);
-  return { projects, feedback, builders };
+/**
+ * The one figure that belongs to everyone. Project and feedback totals were
+ * shown here too, but sitting under a user's own karma they read as personal
+ * numbers — those are per-user and live on the profile instead.
+ */
+export function countBuilders() {
+  return countOf('users');
 }

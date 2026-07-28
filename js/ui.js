@@ -107,6 +107,52 @@ export function authErrorMessage(error) {
   return messages[error?.code] || error?.message || 'Something went wrong. Please try again.';
 }
 
+/** Unread count on the Profile nav button. Silent when there is nothing new. */
+export function renderActivityBadge(count) {
+  const button = document.querySelector('.nav-btn[data-nav="profile.html"]');
+  if (!button) return;
+  button.querySelector('.nav-badge')?.remove();
+  if (!count) return;
+
+  const badge = document.createElement('span');
+  badge.className = 'nav-badge';
+  badge.textContent = count > 9 ? '9+' : String(count);
+  badge.setAttribute('aria-label', `${count} new`);
+  button.appendChild(badge);
+}
+
+/** "3 hours ago" reads better than a date on an activity list. */
+export function timeAgo(value) {
+  if (!value) return '';
+  const date = value.toDate ? value.toDate() : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return 'just now';
+
+  const units = [
+    ['minute', 60],
+    ['hour', 3600],
+    ['day', 86400],
+    ['week', 604800],
+    ['month', 2592000],
+    ['year', 31536000]
+  ];
+
+  let label = 'year';
+  let size = 31536000;
+  for (let i = 0; i < units.length; i++) {
+    const next = units[i + 1];
+    if (!next || seconds < next[1]) {
+      [label, size] = units[i];
+      break;
+    }
+  }
+
+  const amount = Math.floor(seconds / size);
+  return `${amount} ${label}${amount === 1 ? '' : 's'} ago`;
+}
+
 export function levelFor(karma) {
   if (karma >= 100) return 'Karma Master';
   if (karma >= 50) return 'Super Builder';

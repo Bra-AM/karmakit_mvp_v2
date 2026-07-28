@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Profile - KarmaKit</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=6"/>
+  <link rel="stylesheet" href="style.css?v=7"/>
 </head>
 <body>
   <header class="enhanced-header">
@@ -19,15 +19,15 @@
       </div>
       <nav class="main-nav">
         <button class="nav-btn" data-nav="index.html">
-          <span class="nav-icon">🏠</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>
           Home
         </button>
         <button class="nav-btn" data-nav="submit.html">
-          <span class="nav-icon">🚀</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 18h5"/><path d="M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8.9.9 1.5l.1.6h5l.1-.6c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z"/></svg>
           Submit Idea
         </button>
         <button class="nav-btn active" data-nav="profile.html">
-          <span class="nav-icon">👤</span>
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M4.8 20a7.5 7.5 0 0 1 14.4 0"/></svg>
           Profile
         </button>
       </nav>
@@ -74,6 +74,20 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="activity-panel">
+      <div class="section-header">
+        <h3>
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 8.5a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16s-2-1.5-2-6.5Z"/>
+            <path d="M10.3 19a2 2 0 0 0 3.4 0"/>
+          </svg>
+          Activity
+        </h3>
+        <span class="activity-count" id="activity-count" hidden></span>
+      </div>
+      <div id="activity-list" class="activity-list"></div>
     </div>
 
     <div class="stats-grid">
@@ -314,10 +328,10 @@
   </div>
 
 <script type="module">
-import { requireAuth, logout, getProfile, saveProfile, renderVerifyBanner } from './js/auth.js';
+import { requireAuth, logout, getProfile, saveProfile, markActivitySeen, renderVerifyBanner } from './js/auth.js';
 import * as api from './js/api.js';
 import { db, auth } from './js/firebase-config.js';
-import { esc, initials, colorFor, avatarMarkup, formatDate, navigate, showToast, setBusy, safeUrl, levelFor, rankFor } from './js/ui.js';
+import { esc, initials, colorFor, avatarMarkup, formatDate, timeAgo, navigate, showToast, setBusy, safeUrl, levelFor, rankFor } from './js/ui.js';
 import { collection, query, where, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
@@ -475,7 +489,69 @@ async function render() {
   document.getElementById('karma-feedback').textContent = karma.breakdown.feedbackGiven;
   document.getElementById('karma-reviews').textContent = karma.breakdown.projectsReviewed;
 
-  await Promise.all([renderProjects(), renderConnections()]);
+  await Promise.all([renderProjects(), renderConnections(), renderActivity()]);
+}
+
+/* ---------------------------------------------------------------- activity */
+
+async function renderActivity() {
+  const container = document.getElementById('activity-list');
+  const countEl = document.getElementById('activity-count');
+  const since = profile?.lastSeenActivityAt || null;
+
+  const items = await api.getActivity(user.uid, since);
+  const unread = items.filter((item) => item.isNew).length;
+
+  if (unread) {
+    countEl.textContent = `${unread} new`;
+    countEl.hidden = false;
+  } else {
+    countEl.hidden = true;
+  }
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="empty-projects">
+        <div class="empty-icon">🌱</div>
+        <h4>Nothing yet</h4>
+        <p>When someone gives you feedback or asks to connect, it shows up here.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = items
+    .map((item) => {
+      const isConnection = item.type === 'connection';
+      return `
+      <div class="activity-item${item.isNew ? ' is-new' : ''}">
+        <div class="activity-avatar" style="background:${colorFor(item.who)}">${esc(initials(item.who))}</div>
+        <div class="activity-body">
+          <p class="activity-headline">
+            <strong>${esc(item.who)}</strong>
+            ${isConnection ? 'wants to connect with you' : 'gave feedback on your project'}
+            ${item.isNew ? '<span class="new-dot" aria-label="new"></span>' : ''}
+          </p>
+          ${item.text ? `<p class="activity-text">${esc(item.text)}</p>` : ''}
+          ${isConnection && item.email
+            ? `<p class="activity-contact"><a href="mailto:${esc(item.email)}">${esc(item.email)}</a></p>`
+            : ''}
+          ${!isConnection && item.wantsConnection
+            ? '<p class="activity-contact">🤝 They also asked to connect — details below.</p>'
+            : ''}
+          <small class="activity-time">${esc(timeAgo(item.createdAt))}</small>
+        </div>
+      </div>`;
+    })
+    .join('');
+
+  // Mark as seen only after they have actually been rendered.
+  if (unread) {
+    try {
+      await markActivitySeen(user.uid);
+    } catch (error) {
+      console.error('Could not record activity as seen', error);
+    }
+  }
 }
 
 /* ------------------------------------------------- editing your projects -- */

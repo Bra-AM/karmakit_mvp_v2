@@ -115,6 +115,19 @@ export function saveProfile(uid, data) {
   return setDoc(doc(db, 'users', uid), { ...data, updatedAt: serverTimestamp() }, { merge: true });
 }
 
+/**
+ * Records that the user has looked at their activity list. Everything received
+ * after this timestamp counts as unread — that one field is the entire
+ * notification system's state.
+ */
+export function markActivitySeen(uid) {
+  return setDoc(
+    doc(db, 'users', uid),
+    { lastSeenActivityAt: serverTimestamp() },
+    { merge: true }
+  );
+}
+
 /** Nudge unverified accounts without blocking them. */
 export function renderVerifyBanner(user) {
   if (!user || user.emailVerified) return;
