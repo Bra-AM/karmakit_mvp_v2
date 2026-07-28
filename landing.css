@@ -82,6 +82,7 @@
 .auth-pitch > *:nth-child(5) { animation-delay: 0.33s; }
 .auth-pitch > *:nth-child(6) { animation-delay: 0.40s; }
 .auth-pitch > *:nth-child(7) { animation-delay: 0.47s; }
+.auth-pitch > *:nth-child(8) { animation-delay: 0.54s; }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(16px); }
@@ -165,6 +166,22 @@
   line-height: 1.65;
   max-width: 44ch;
   margin-bottom: 1.9rem;
+}
+
+/* The emotional close of the pitch. Deliberately the only line other than the
+   headline that carries the gradient, so it reads as the second beat of the
+   same thought rather than as another paragraph. */
+.pitch-close {
+  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  max-width: 42ch;
+  margin-bottom: 1.9rem;
+  background: linear-gradient(100deg, #7c4dff 0%, #c2410c 65%, #e0a92b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* The reciprocity loop — the core idea, shown rather than explained. */
