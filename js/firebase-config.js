@@ -37,7 +37,10 @@ export const app = initializeApp(firebaseConfig);
 // Setup and the enforcement order are documented in SETUP.md, section 11.
 // Getting that order wrong locks out real users, so read it before enforcing.
 
-const RECAPTCHA_SITE_KEY = 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY';
+// Public by design, exactly like the Firebase config above — it appears in the
+// page source of every site that uses reCAPTCHA. The secret key is the half
+// that matters, and it lives only in the Firebase console.
+const RECAPTCHA_SITE_KEY = '6Lc5cmotAAAAABcQZRH9DqMjz-KDYeG2E3nMhQ2Z';
 
 if (RECAPTCHA_SITE_KEY !== 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY') {
   // On localhost the reCAPTCHA check cannot succeed, so the SDK prints a debug
