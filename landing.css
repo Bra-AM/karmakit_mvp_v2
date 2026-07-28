@@ -81,6 +81,7 @@
 .auth-pitch > *:nth-child(4) { animation-delay: 0.26s; }
 .auth-pitch > *:nth-child(5) { animation-delay: 0.33s; }
 .auth-pitch > *:nth-child(6) { animation-delay: 0.40s; }
+.auth-pitch > *:nth-child(7) { animation-delay: 0.47s; }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(16px); }
@@ -212,6 +213,32 @@
   color: var(--text-gray);
   line-height: 1.35;
 }
+
+/* The third value prop, after feedback and karma: who you meet. */
+.connect-note {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.9rem;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(48, 31, 79, 0.1);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  max-width: 46ch;
+  backdrop-filter: blur(8px);
+}
+
+.connect-icon { font-size: 1.05rem; line-height: 1.5; flex-shrink: 0; }
+
+.connect-note p {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #574a6f;
+  margin: 0;
+}
+
+.connect-note strong { color: var(--primary); font-weight: 600; }
 
 /* Product preview — show the thing, don't just describe it. */
 .preview {
