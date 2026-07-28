@@ -116,8 +116,13 @@ export async function castVote(user, project, type) {
 
 /* ---------------------------------------------------------------- comments */
 
+/**
+ * One piece of feedback per person per project, enforced by the document ID
+ * rather than by client-side checks. Posting again revises what you said
+ * instead of adding another +3 to your karma.
+ */
 export async function addComment(user, project, { text, wantsConnection }) {
-  await addDoc(collection(db, 'comments'), {
+  await setDoc(doc(db, 'comments', `${project.id}_${user.uid}`), {
     projectId: project.id,
     projectOwnerId: project.ownerId,
     userId: user.uid,

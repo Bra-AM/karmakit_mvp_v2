@@ -19,12 +19,20 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteField,
   serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const googleProvider = new GoogleAuthProvider();
 
-/** Creates users/{uid} on first sign-in. Safe to call on every sign-in. */
+/**
+ * Creates users/{uid} on first sign-in. Safe to call on every sign-in.
+ *
+ * Deliberately stores NO email address. This document is readable by every
+ * signed-in user so that display names can appear on projects, which means
+ * anything in here is effectively public. Email lives in Firebase Auth and
+ * reaches another person only when you send them a connection request.
+ */
 async function ensureUserDoc(user, extras = {}) {
   const ref = doc(db, 'users', user.uid);
   const snapshot = await getDoc(ref);
@@ -32,7 +40,6 @@ async function ensureUserDoc(user, extras = {}) {
   if (!snapshot.exists()) {
     await setDoc(ref, {
       displayName: extras.displayName || user.displayName || user.email.split('@')[0],
-      email: user.email,
       company: extras.company || '',
       bio: '',
       allowConnections: true,
@@ -42,10 +49,17 @@ async function ensureUserDoc(user, extras = {}) {
     return;
   }
 
-  // Google may have a photo/name we did not have at registration time.
-  if (!snapshot.data().displayName && user.displayName) {
-    await setDoc(ref, { displayName: user.displayName }, { merge: true });
-  }
+  const data = snapshot.data();
+  const patch = {};
+
+  // Google may have a name we did not have at registration time.
+  if (!data.displayName && user.displayName) patch.displayName = user.displayName;
+
+  // Scrubs the email that older versions of this app stored here. Runs once
+  // per account, the next time that person signs in.
+  if ('email' in data) patch.email = deleteField();
+
+  if (Object.keys(patch).length) await setDoc(ref, patch, { merge: true });
 }
 
 export async function registerWithEmail({ email, password, displayName, company }) {
@@ -112,7 +126,18 @@ export async function getProfile(uid) {
 }
 
 export function saveProfile(uid, data) {
-  return setDoc(doc(db, 'users', uid), { ...data, updatedAt: serverTimestamp() }, { merge: true });
+  return setDoc(
+    doc(db, 'users', uid),
+    {
+      ...data,
+      // Always strips the email an older version of this app stored here. The
+      // rules now reject any user document containing one, so a merge that left
+      // a legacy value in place would fail the write.
+      email: deleteField(),
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
 }
 
 /**
@@ -123,7 +148,7 @@ export function saveProfile(uid, data) {
 export function markActivitySeen(uid) {
   return setDoc(
     doc(db, 'users', uid),
-    { lastSeenActivityAt: serverTimestamp() },
+    { lastSeenActivityAt: serverTimestamp(), email: deleteField() },
     { merge: true }
   );
 }

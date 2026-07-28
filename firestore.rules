@@ -37,20 +37,22 @@ service cloud.firestore {
 
     /* ------------------------------------------------------------- users */
     match /users/{uid} {
-      // Profiles are visible to signed-in builders so names show on projects.
+      // Readable by signed-in builders, which is why NO email address may be
+      // stored here. It previously was, and "readable by any signed-in user"
+      // meant one getDocs() call returned every member's email address —
+      // directly contradicting the privacy policy. Email lives in Firebase Auth
+      // and reaches another user only through a connection request.
       allow read: if signedIn();
 
       allow create: if isSelf(uid)
         && text(request.resource.data.displayName, 1, 50)
-        // Email comes from the verified auth token, not from user input.
-        && request.resource.data.email == request.auth.token.email;
+        && !('email' in request.resource.data);
 
       allow update: if isSelf(uid)
         && text(request.resource.data.displayName, 1, 50)
         && text(request.resource.data.company, 0, 100)
         && text(request.resource.data.bio, 0, 150)
-        // Email is immutable here; changing it must go through Firebase Auth.
-        && request.resource.data.email == resource.data.email;
+        && !('email' in request.resource.data);
 
       allow delete: if isSelf(uid);
     }
@@ -107,7 +109,12 @@ service cloud.firestore {
     match /comments/{commentId} {
       allow read: if signedIn();
 
+      // The ID is pinned to projectId_uid, exactly like votes. Without this the
+      // same person could post unlimited feedback on ONE project and collect +3
+      // every time — a few lines of scripting was worth unlimited karma. One
+      // document per person per project caps it at +3, permanently.
       allow create: if isSelf(request.resource.data.userId)
+        && commentId == request.resource.data.projectId + '_' + request.auth.uid
         // Minimum length is the cheapest available quality floor: it stops
         // "ok" being farmed for +3 karma across every project in the feed.
         && text(request.resource.data.text, 10, 500)
@@ -115,9 +122,14 @@ service cloud.firestore {
         && request.resource.data.projectOwnerId != request.auth.uid
         && request.resource.data.projectOwnerId == projectOwner(request.resource.data.projectId);
 
-      // Immutable once posted, so a builder cannot be shown one thing and
-      // have it rewritten later. Authors may delete instead.
-      allow update: if false;
+      // Authors may revise their own words. Karma is unaffected either way,
+      // since it counts documents rather than edits.
+      allow update: if isSelf(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.projectId == resource.data.projectId
+        && request.resource.data.projectOwnerId == resource.data.projectOwnerId
+        && text(request.resource.data.text, 10, 500);
+
       allow delete: if isSelf(resource.data.userId);
     }
 
