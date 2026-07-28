@@ -214,6 +214,75 @@ set up as a working address (Namecheap sells email forwarding cheaply).
 
 ---
 
+## 11. App Check — blocking scripted abuse
+
+Security rules decide **what a signed-in user may do**. App Check decides **whether the
+caller is your app at all**. Without it, anyone can copy the public config from
+`js/firebase-config.js` and drive your database from a script: mass account creation,
+bulk-reading every comment, spamming projects. The rules still hold, but nothing forces
+an attacker to go through your website.
+
+⚠️ **Do the steps in this order.** Enforcing before real traffic is verified locks out
+every one of your users.
+
+### 11a. Create a reCAPTCHA v3 key
+
+Go to <https://www.google.com/recaptcha/admin/create>.
+
+- Label: `KarmaKit`
+- Type: **reCAPTCHA v3** (score-based). Not v2 — v3 is invisible, users see nothing.
+- Domains: `karmakitapp.com`, `www.karmakitapp.com`, `karmakit-d38da.web.app`,
+  `karmakit-d38da.firebaseapp.com`, `localhost`
+- Submit
+
+You get two keys. The **site key** goes in the code, the **secret key** goes to Firebase.
+
+### 11b. Register the app in Firebase
+
+Firebase console → **App Check** (under Security) → **Apps** tab → your web app →
+**reCAPTCHA v3** → paste the **secret key** → Save.
+
+### 11c. Put the site key in the code
+
+In `js/firebase-config.js`, replace `REPLACE_WITH_RECAPTCHA_V3_SITE_KEY` with your
+**site key**, then `firebase deploy --only hosting`.
+
+Until that placeholder is replaced, App Check simply does not initialise — so the app
+keeps working normally and nothing breaks by having this code present.
+
+### 11d. Watch before you enforce
+
+Open **App Check → APIs → Cloud Firestore**. It shows verified vs unverified requests.
+
+Visit the live site, sign in, vote, leave feedback. Those should appear as **verified**
+within a few minutes. Leave it collecting for **24 hours** so anyone with an open session
+is counted too.
+
+### 11e. Then enforce
+
+Only once verified requests dominate:
+
+- **App Check → APIs → Cloud Firestore → Enforce**
+- **App Check → APIs → Authentication → Enforce** ← this is the one that stops scripted
+  sign-ups, which is the main abuse vector for a public launch
+
+From then on, requests without a valid App Check token are rejected before your rules
+are even consulted.
+
+### Developing locally afterwards
+
+`localhost` cannot pass a real reCAPTCHA check. The code already sets the debug flag when
+the hostname is `localhost` or `127.0.0.1`, so the SDK prints a debug token to the browser
+console. Copy it into **App Check → Apps → (your app) → Manage debug tokens**.
+
+Treat that token like a password — anyone holding it bypasses App Check entirely.
+
+### Cost
+
+reCAPTCHA v3 is free at this scale. App Check itself is free on the Spark plan.
+
+---
+
 ## 7. Test it properly
 
 Use two different browsers, or one normal and one incognito, so you're genuinely two users.

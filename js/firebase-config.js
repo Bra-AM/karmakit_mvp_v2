@@ -9,6 +9,10 @@
 // access control lives in firestore.rules, which runs on Google's servers.
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  initializeAppCheck,
+  ReCaptchaV3Provider
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -22,6 +26,39 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+
+/* --------------------------------------------------------------- App Check */
+//
+// App Check proves a request came from THIS website rather than from a script
+// using our public config. The security rules decide what a user may do;
+// App Check decides whether the caller is our app at all. Without it, mass
+// account creation and bulk scraping only need a copy of the config above.
+//
+// Setup and the enforcement order are documented in SETUP.md, section 11.
+// Getting that order wrong locks out real users, so read it before enforcing.
+
+const RECAPTCHA_SITE_KEY = 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY';
+
+if (RECAPTCHA_SITE_KEY !== 'REPLACE_WITH_RECAPTCHA_V3_SITE_KEY') {
+  // On localhost the reCAPTCHA check cannot succeed, so the SDK prints a debug
+  // token to the console instead. Register that token under App Check -> Apps
+  // -> Manage debug tokens to keep developing once enforcement is on.
+  if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    // Never let an App Check misconfiguration take the whole app down. Until
+    // enforcement is switched on in the console, requests still succeed.
+    console.error('App Check failed to initialise', error);
+  }
+}
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
